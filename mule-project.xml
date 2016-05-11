@@ -2,6 +2,5 @@
 <mule-project xmlns="http://www.mulesoft.com/tooling/project" runtimeId="org.mule.tooling.server.3.7.3.ee" schemaVersion="5.3.0.0">
     <name>template-apiled-system-account-sap</name>
     <description></description>
-    <muleExtension name="APIkit" qualifier="org.mule.tooling.apikit.3.7.0"/>
-    <muleExtension name="SAP" qualifier="org.mule.tooling.ui.contribution.sap.3.5.0"/>
+    <muleExtension name="Munit" qualifier="org.mule.tooling.ui.contribution.munit"/>
 </mule-project>

@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<BAPI_CUSTOMER_FIND>
+	<import>
+		<MAX_CNT>0</MAX_CNT>
+		<PL_HOLD/>
+	</import>
+	<export>
+		<RETURN>
+			<TYPE>S</TYPE>
+			<ID>FN</ID>
+			<NUMBER>800</NUMBER>
+			<MESSAGE>No errors have occurred</MESSAGE>
+			<LOG_NO/>
+			<LOG_MSG_NO>000000</LOG_MSG_NO>
+			<MESSAGE_V1/>
+			<MESSAGE_V2/>
+			<MESSAGE_V3/>
+			<MESSAGE_V4/>
+		</RETURN>
+	</export>
+	<tables>
+		<RESULT_TAB>
+			<row id="0">
+				<COMP_CODE/>
+				<TABNAME>KNA1</TABNAME>
+				<FIELDNAME>KUNNR</FIELDNAME>
+				<FIELDVALUE>0000301981</FIELDVALUE>
+				<CUSTOMER>0000301981</CUSTOMER>
+				<PSTG_BLK_G/>
+				<PSTG_BLK_C/>
+				<DEL_FLAG_G/>
+				<DEL_FLAG_C/>
+				<TYPE>S</TYPE>
+				<ID>FN</ID>
+				<NUMBER>800</NUMBER>
+				<MESSAGE>No errors have occurred</MESSAGE>
+				<LOG_NO/>
+				<LOG_MSG_NO>000000</LOG_MSG_NO>
+				<MESSAGE_V1/>
+				<MESSAGE_V2/>
+				<MESSAGE_V3/>
+				<MESSAGE_V4/>
+			</row>
+		</RESULT_TAB>
+		<SELOPT_TAB>
+			<row id="0">
+				<COMP_CODE/>
+				<TABNAME>KNA1</TABNAME>
+				<FIELDNAME>KUNNR</FIELDNAME>
+				<FIELDVALUE>0000301981</FIELDVALUE>
+			</row>
+		</SELOPT_TAB>
+	</tables>
+</BAPI_CUSTOMER_FIND>

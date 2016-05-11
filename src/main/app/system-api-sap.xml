@@ -158,9 +158,6 @@ if (!payload.isEmpty() && flowVars.queryParams.orderBy != null) {
 
 
 //pagination
-
-
-
 if (!payload.isEmpty()   &&   flowVars.queryParams.maxResults != null ) {
 	
 	// return empty array when out of bounds or no results expected
@@ -169,7 +166,7 @@ if (!payload.isEmpty()   &&   flowVars.queryParams.maxResults != null ) {
 
 	} else {	
 			offset = (flowVars.queryParams.offset != null)  ?  flowVars.queryParams.offset  :  0;
-			limit  =    (offset + flowVars.queryParams.maxResults   >=   payload.size())    ?   payload.size() - 1   :    (offset + flowVars.queryParams.maxResults - 1);
+			limit  =    (Math.addExact(offset , flowVars.queryParams.maxResults)   >=   payload.size())    ?   payload.size() - 1   :    (Math.addExact(offset, flowVars.queryParams.maxResults) - 1);
 			dwScript =  "payload[" + offset +   ".." + limit + "]"; 
 			payload = dw(dwScript);
 	}
@@ -214,6 +211,7 @@ AccountGroup : payload."CUSTOMER_GET_KTOKD".export."EV_KTOKD"
 </BAPI_CUSTOMER_GETINTNUMBER>
 ]]></sap:definition>
                 </sap:outbound-endpoint>
+
                 <dw:transform-message doc:name="BAPI_CUSTOMER_GETINTNUMBER">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
@@ -323,42 +321,12 @@ DEBMAS01 : {
 	</import>
 </CUSTOMER_GET_KTOKD>]]></sap:definition>
                         </sap:outbound-endpoint>
+
                         <dw:transform-message doc:name="CUSTOMER_GET_KTOKD to AccountGroup">
                             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
 payload."CUSTOMER_GET_KTOKD".export."EV_KTOKD"
-]]></dw:set-payload>
-                        </dw:transform-message>
-                    </processor-chain>
-                </enricher>
-                <enricher source="#[payload.isEmpty() ? null : payload[0]['CustomerNumber']]" target="#[flowVars.customerNumber]" doc:name="save 'customerNumber'" doc:description="Query customer from the SAP by a saleforce account name. The query result is stored to the 'sapCustomer' record variable to be processed/enhanced in next batch steps.">
-                    <processor-chain doc:name="Processor Chain">
-                        <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="function" functionName="BAPI_CUSTOMER_FIND" xmlVersion="2" outputXml="true" evaluateFunctionResponse="true" responseTimeout="10000" doc:name="get Customer by ID">
-                            <sap:definition><![CDATA[<BAPI_CUSTOMER_FIND type="function">
-	<import>
-		<MAX_CNT type="field" sapType="INT">0</MAX_CNT>
-		<PL_HOLD type="field" sapType="CHAR" sapLength="1">X</PL_HOLD>
-	</import>
-  	<tables>
-  	<SELOPT_TAB type="table">
-			<row id="0">
-				<TABNAME type="field" sapType="CHAR" sapLength="4">KNA1</TABNAME>
-				<FIELDNAME type="field" sapType="INT" sapLength="5">KUNNR</FIELDNAME>
-				<FIELDVALUE type="field" sapType="CHAR" sapLength="20">#[flowVars.id]</FIELDVALUE>
-			</row>
-		</SELOPT_TAB>
-	</tables>
-</BAPI_CUSTOMER_FIND>]]></sap:definition>
-                        </sap:outbound-endpoint>
-                        <dw:transform-message doc:name="BAPI_CUSTOMER_FIND to Customer">
-                            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row map 
-{
-	(CustomerNumber : $.CUSTOMER) when ($.CUSTOMER != "")
-}
 ]]></dw:set-payload>
                         </dw:transform-message>
                     </processor-chain>
@@ -384,7 +352,7 @@ DEBMAS01 : {
 		E1KNA1M @(SEGMENT : "1") : {
 			//setup properties for update or create (005 for update and 009 for create)
 			MSGFN       : "005",
-			KUNNR       : flowVars.customerNumber,
+			KUNNR       : flowVars.id,
 			KTOKD       : flowVars.accountGroup       when (flowVars.accountGroup != null)   otherwise p('sap.default.accountGroup'),
 			LAND1       : "US",
 			NAME1       : flowVars.input.name               when ((sizeOf flowVars.input.name) <= 20)    otherwise flowVars.input.name[0..19],
@@ -407,6 +375,7 @@ DEBMAS01 : {
             </otherwise>
         </choice>
 
+
     </flow>
     
         
@@ -423,6 +392,7 @@ DEBMAS01 : {
 </ZCAFM_CUSTOMER_DELETE>
 ]]></sap:definition>
                 </sap:outbound-endpoint>
+
             </when>
             <otherwise>
                 <set-property propertyName="http.status" value="#[404]" doc:name="Resource Not Found"/>
@@ -432,61 +402,62 @@ DEBMAS01 : {
 
     </flow>
     <sub-flow name="getCustomerDetails">
-        <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="function" functionName="BAPI_CUSTOMER_GETDETAIL2" xmlVersion="2" outputXml="true" evaluateFunctionResponse="true" responseTimeout="10000" doc:name="Get Customer Details by ID">
-            <sap:definition><![CDATA[<BAPI_CUSTOMER_GETDETAIL2 type="function">
-  <import>
-    <CUSTOMERNO type="field" sapType="INT">#[flowVars.id]</CUSTOMERNO>
-  </import>
-</BAPI_CUSTOMER_GETDETAIL2>
-]]></sap:definition>
-        </sap:outbound-endpoint>
-        <dw:transform-message metadata:id="9f1dbaeb-0b68-4e3d-9dc3-71f6e782b034" doc:name="response to JSON">
-            <dw:input-payload/>
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-using (addressData = payload.BAPI_CUSTOMER_GETDETAIL2.export.CUSTOMERADDRESS)
-{
-	id                  : addressData.CUSTOMER,
-	nativeId            : addressData.CUSTOMER,
-	name                : addressData.NAME,
-	billingStreet       : addressData.STREET,
-	billingCity         : addressData.CITY,
-	
-	billingState        : addressData.STATE,
-	billingPostalCode   : addressData."POSTL_CODE",
-	billingCountry      : addressData.COUNTRYISO,
-	shippingStreet      : null,
-	shippingCity        : null,
-	shippingState       : null,
-	shippingPostalCode  : null,
-	shippingCountry     : null,
-	lastModifiedDate    : payload.LastModifiedDate
- }]]></dw:set-payload>
-        </dw:transform-message>
-        <enricher doc:name="Message Enricher">
-            <processor-chain doc:name="Processor Chain">
-                <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="function" functionName="ZSDFM_CUSTOMER_GETLIST" xmlVersion="2" outputXml="true" evaluateFunctionResponse="true" responseTimeout="10000" doc:name="Get additional details of customer">
-                    <sap:definition><![CDATA[<ZSDFM_CUSTOMER_GETLIST>
+        <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="function" functionName="ZSDFM_CUSTOMER_GETLIST" xmlVersion="2" outputXml="true" evaluateFunctionResponse="true" responseTimeout="10000" doc:name="Get additional details of customer">
+            <sap:definition><![CDATA[<ZSDFM_CUSTOMER_GETLIST>
   	<import>
   		<IV_CUST_ID>#[flowVars.id]</IV_CUST_ID>
   	</import>
 </ZSDFM_CUSTOMER_GETLIST>]]></sap:definition>
-                </sap:outbound-endpoint>
-
-                <dw:transform-message doc:name="add metadata">
-                    <dw:set-payload><![CDATA[%dw 1.0
+        </sap:outbound-endpoint>
+        <dw:transform-message doc:name="to payload">
+            <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
-payload.ZSDFM_CUSTOMER_GETLIST.tables.T_KNA1.*row map {
-	LastModifiedDate : $.LAST_MODIF_DATE,
-	LastModifiedById : $.AENAM
-}]]></dw:set-payload>
-                </dw:transform-message>
-            </processor-chain>
-            <enrich source="#[payload[0].LastModifiedDate]" target="#[payload.lastModifiedDate]"/>
-            <enrich source="#[payload[0].LastModifiedById]" target="#[payload.lastModifiedById]"/>
-        </enricher>
+(payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1".*row map {
+	id                : $.KUNNR,
+	name              : $.NAME1,
+	billingStreet     : $.STRAS,
+	billingCity       : $.ORT01,
+	billingPostalCode : $.PSTLZ,
+	billingState      : null,
+	billingCountry    : $.LAND1,
+	lastModifiedDate  : $."LAST_MODIF_DATE",
+	lastModifiedById  : $.AENAM
+})[0] when payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1" is :object otherwise null]]></dw:set-payload>
+        </dw:transform-message>
+<!--         <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="function" functionName="BAPI_CUSTOMER_GETDETAIL2" xmlVersion="2" outputXml="true" evaluateFunctionResponse="true" responseTimeout="10000" doc:name="Get Customer Details by ID"> -->
+<!--             <sap:definition><![CDATA[<BAPI_CUSTOMER_GETDETAIL2 type="function"> -->
+<!--   <import> -->
+<!--     <CUSTOMERNO type="field" sapType="INT">#[flowVars.id]</CUSTOMERNO> -->
+<!--   </import> -->
+<!-- </BAPI_CUSTOMER_GETDETAIL2> -->
+<!-- ]]></sap:definition> -->
+<!--         </sap:outbound-endpoint> -->
+<!--         <dw:transform-message metadata:id="9f1dbaeb-0b68-4e3d-9dc3-71f6e782b034" doc:name="response to JSON"> -->
+<!--             <dw:input-payload/> -->
+<!--             <dw:set-payload><![CDATA[%dw 1.0 -->
+<!-- %output application/java -->
+<!-- - - - -->
+<!-- using (addressData = payload.BAPI_CUSTOMER_GETDETAIL2.export.CUSTOMERADDRESS) -->
+<!-- { -->
+<!-- 	id                  : addressData.CUSTOMER, -->
+<!-- 	nativeId            : addressData.CUSTOMER, -->
+<!-- 	name                : addressData.NAME, -->
+<!-- 	billingStreet       : addressData.STREET, -->
+<!-- 	billingCity         : addressData.CITY, -->
+	
+<!-- 	billingState        : addressData.STATE, -->
+<!-- 	billingPostalCode   : addressData."POSTL_CODE", -->
+<!-- 	billingCountry      : addressData.COUNTRYISO, -->
+<!-- 	shippingStreet      : null, -->
+<!-- 	shippingCity        : null, -->
+<!-- 	shippingState       : null, -->
+<!-- 	shippingPostalCode  : null, -->
+<!-- 	shippingCountry     : null, -->
+<!-- 	lastModifiedDate    : payload.LastModifiedDate -->
+<!--  }]]></dw:set-payload> -->
+<!--         </dw:transform-message> -->
+
     </sub-flow>
     <sub-flow name="checkCustomer">
         <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="function" functionName="BAPI_CUSTOMER_FIND" xmlVersion="2" outputXml="true" evaluateFunctionResponse="true" responseTimeout="10000" doc:name="BAPI_CUSTOMER_FIND">
@@ -502,14 +473,14 @@ payload.ZSDFM_CUSTOMER_GETLIST.tables.T_KNA1.*row map {
   </tables>
 </BAPI_CUSTOMER_FIND>]]></sap:definition>
         </sap:outbound-endpoint>
+
         <dw:transform-message doc:name="check customer">
             <dw:set-variable variableName="customerExists"><![CDATA[%dw 1.0
 %output application/java
 ---
-true 
-when (payload.BAPI_CUSTOMER_FIND.tables.RESULT_TAB.*row[0]."CUSTOMER" != "" 
-		and 
-      payload.BAPI_CUSTOMER_FIND.tables.RESULT_TAB.*row[0]."DEL_FLAG_G" != "X")
+true when (payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row[0]."CUSTOMER" != "" 
+		   and 
+           payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row[0]."DEL_FLAG_G" != "X")
 otherwise false    ]]></dw:set-variable>
         </dw:transform-message>
     </sub-flow>

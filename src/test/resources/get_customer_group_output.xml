@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='windows-1250'?>
+<CUSTOMER_GET_KTOKD>
+	<import>
+		<IV_KTOKD></IV_KTOKD>
+		<IV_KUNNR>0000301981</IV_KUNNR>
+	</import>
+	<export>
+		<EV_KTOKD>ZAG2</EV_KTOKD>
+	</export>
+</CUSTOMER_GET_KTOKD>

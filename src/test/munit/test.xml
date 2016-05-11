@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mock="http://www.mulesoft.org/schema/mule/mock" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration" mock-connectors="false" mock-inbounds="false"/>
+    <context:property-placeholder location="mule.test.properties" />
+    <spring:beans>
+        <spring:import resource="classpath:system-api-sap.xml"/>
+    </spring:beans>
+    <http:request-config name="HTTP_Request_Configuration" host="${api.domain}" port="${http.port}" basePath="/api" doc:name="HTTP Request Configuration">
+        <http:raml-api-configuration location="system-api.raml"/>
+    </http:request-config>
+    <munit:test name="test-get:/accounts:system-api-configTest-nameProvided" description="Test" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock BAPI_CUSTOMER_FIND">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_collection_output.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts" method="GET" doc:name="HTTP GET Request">
+            <http:request-builder>
+                <http:query-param paramName="name" value="walker"/>
+                <http:query-param paramName="modifiedAfter" value="2016-04-01T00:00:00.000Z"/>
+                <http:query-param paramName="modifiedBefore" value="2016-05-01T00:00:00.000Z"/>
+                <http:query-param paramName="maxResults" value="25"/>
+                <http:query-param paramName="offset" value="0"/>
+                <http:query-param paramName="orderBy" value="lastmodifieddate"/>
+                <http:query-param paramName="order" value="asc"/>
+            </http:request-builder>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
+        <dw:transform-message doc:name="extract IDs">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map $.id]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-on-equals message="There should be 3 accounts in the payload." expectedValue="#[3]" actualValue="#[payload.size()]" doc:name="There should be 3 accounts"/>
+        <munit:assert-on-equals message="There should be concrete accounts in particular order." expectedValue="#[[&quot;0000301898&quot;, &quot;0000301970&quot;, &quot;0000301973&quot;]]" actualValue="#[payload]" doc:name="There should be concrete accounts in particular order"/>
+    </munit:test>
+    <munit:test name="test-get:/accounts:system-api-configTest-nameNotProvided" description="MUnit Test">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock ZSDFM_CUSTOMER_GETLIST">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['ZSDFM_CUSTOMER_GETLIST']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('zsdfm_customer_getlist_collection_output.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts" method="GET" doc:name="HTTP GET Request">
+            <http:request-builder>
+                <http:query-param paramName="modifiedAfter" value="2016-04-01T00:00:00.000Z"/>
+                <http:query-param paramName="modifiedBefore" value="2016-05-01T00:00:00.000Z"/>
+                <http:query-param paramName="maxResults" value="10"/>
+                <http:query-param paramName="offset" value="5"/>
+                <http:query-param paramName="orderBy" value="name"/>
+                <http:query-param paramName="order" value="desc"/>
+            </http:request-builder>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
+        <dw:transform-message doc:name="extract IDs">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map $.id]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-on-equals message="There should be 10 accounts in the payload." expectedValue="#[10]" actualValue="#[payload.size()]" doc:name="There should be 10 accounts"/>
+        <munit:assert-on-equals message="There should be concrete accounts in particular order." expectedValue="#[[&quot;0000000021&quot;, &quot;TESTER&quot;, &quot;0000700091&quot;, &quot;0000700090&quot;, &quot;0000700089&quot;, &quot;0000700088&quot;, &quot;0000700087&quot;, &quot;0000700086&quot;, &quot;0000700085&quot;, &quot;0000700084&quot;]]" actualValue="#[payload]" doc:name="There should be concrete accounts in particular order"/>
+    </munit:test>
+    <munit:test name="test-get:/accounts:system-api-configTest-no-queryParams-provided" description="MUnit Test">
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts" method="GET" doc:name="HTTP GET Request"/>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
+        <dw:transform-message doc:name="tranform to java object">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-payload-equals message="There should be an empty array" expectedValue="#[[]]" doc:name="There should be an empty array"/>
+    </munit:test>
+    <munit:test name="test-post:/accounts:application/json:system-api-configTest" description="Test" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerGroup">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['get Account Group from SAP']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('get_customer_details_output_success.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerNumber">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['get Next Customer Number from SAP']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_getintnumber_output.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock insertCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['insert Customer in SAP']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[]"/>
+        </mock:when>
+        <dw:transform-message doc:name="set payload">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "name": "Eduard Walker",
+  "phone": "1-(318)596-8473",
+  "email": "ewalker0@liveinternet.ru",
+  "billingStreet": "Pleasure 4598",
+  "billingCity": "Shreveport",
+  "billingState": "Louisiana",
+  "billingPostalCode": "71105",
+  "billingCountry": "United States",
+  "shippingStreet": "Autumn Leaf 3",
+  "shippingCity": "Jackson",
+  "shippingState": "Mississippi",
+  "shippingPostalCode": "39204",
+  "shippingCountry": "United States"
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts" method="POST" doc:name="HTTP POST Request"/>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(201))]" doc:name="Assert that http.status eq 201"/>
+    </munit:test>
+    <munit:test name="test-get:/accounts/{id}:system-api-configTest" description="Test" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock checkCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_success.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerDetails">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Get additional details of customer']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('get_customer_details_output_success.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="GET" doc:name="HTTP GET Request">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="0000301981"/>
+            </http:request-builder>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
+    </munit:test>
+    <munit:test name="test-delete:/accounts/{id}:system-api-configTest" description="Test" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock checkCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_success.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock Delete Customer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Delete Customer']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[]"/>
+        </mock:when>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="DELETE" doc:name="HTTP DELETE Request">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="0000301981"/>
+            </http:request-builder>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(204))]" doc:name="Assert that http.status eq 204"/>
+    </munit:test>
+    <munit:test name="test-delete:/accounts/{id}:system-api-configTest-nonExisting" description="Test">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock checkCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_not_found.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="DELETE" doc:name="HTTP DELETE Request">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="0000000000"/>
+            </http:request-builder>
+            <http:success-status-code-validator values="404"/>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(404)) ]" doc:name="Assert that http.status eq 404"/>
+    </munit:test>
+    <munit:test name="test-put:/accounts/{id}:application/json:system-api-configTest" description="Test">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock checkCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_success.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerGroup">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['get Account Group from SAP']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('get_customer_details_output_success.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock updateCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['update Customer in SAP']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[]"/>
+        </mock:when>
+        <dw:transform-message doc:name="set payload">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "id": "0000301980",
+  "nativeId": "",
+  "name": "Jason Bourne",
+  "phone": "1-(318)596-8473",
+  "fax": "1-(318)596-8474",
+  "email": "test@example.com",
+  "billingStreet": "Pleasure 4598",
+  "billingCity": "Shreveport",
+  "billingState": "Louisiana",
+  "billingPostalCode": "71105",
+  "billingCountry": "United States",
+  "shippingStreet": "Autumn Leaf 3",
+  "shippingCity": "Jackson",
+  "shippingState": "Mississippi",
+  "shippingPostalCode": "39204",
+  "shippingCountry": "United States",
+  "createdDate" : "2016-03-24T15:00:00.000Z",
+  "lastModifiedDate" : "2016-03-24T15:00:00.000Z",
+  "lastModifiedById" : "123456"
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="PUT" doc:name="HTTP PUT Request">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="0000301981"/>
+            </http:request-builder>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(204))]" doc:name="Assert that http.status eq 204"/>
+    </munit:test>
+    <munit:test name="test-get:/accounts/{id}:system-api-configTest-nonExisting" description="Test">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock checkCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_not_found.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="GET" doc:name="HTTP GET Request">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="0000000000"/>
+            </http:request-builder>
+            <http:success-status-code-validator values="404"/>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(404))]" doc:name="Assert that http.status eq 404"/>
+    </munit:test>
+    <munit:test name="test-put:/accounts/{id}:application/json:system-api-configTest-nonExisting" description="Test">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock checkCustomer">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_not_found.xml', null)]" mimeType="application/xml"/>
+        </mock:when>
+        <dw:transform-message doc:name="set payload">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "id": "0000301980",
+  "nativeId": "",
+  "name": "Jason Bourne",
+  "phone": "1-(318)596-8473",
+  "fax": "1-(318)596-8474",
+  "email": "test@example.com",
+  "billingStreet": "Pleasure 4598",
+  "billingCity": "Shreveport",
+  "billingState": "Louisiana",
+  "billingPostalCode": "71105",
+  "billingCountry": "United States",
+  "shippingStreet": "Autumn Leaf 3",
+  "shippingCity": "Jackson",
+  "shippingState": "Mississippi",
+  "shippingPostalCode": "39204",
+  "shippingCountry": "United States",
+  "createdDate" : "2016-03-24T15:00:00.000Z",
+  "lastModifiedDate" : "2016-03-24T15:00:00.000Z",
+  "lastModifiedById" : "123456"
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+        <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="PUT" doc:name="HTTP PUT Request">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="0000000000"/>
+            </http:request-builder>
+            <http:success-status-code-validator values="404"/>
+        </http:request>
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(404))]" doc:name="Assert that http.status eq 404"/>
+    </munit:test>
+</mule>
