@@ -45,14 +45,6 @@
 							<groupId>com.mulesoft.muleesb.transports</groupId>
 							<artifactId>mule-transport-sap</artifactId>
 						</inclusion>
-						<inclusion>
-							<groupId>com.sap.conn.jco</groupId>
-							<artifactId>sapjco</artifactId>
-						</inclusion>
-						<inclusion>
-							<groupId>com.sap.conn.idoc</groupId>
-							<artifactId>sapidoc</artifactId>
-						</inclusion>
 					</inclusions>
 				</configuration>
 			</plugin>
@@ -165,20 +157,24 @@
 			<artifactId>mule-transport-sap</artifactId>
 			<version>${sap.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sap.conn.jco</groupId>
-			<artifactId>sapjco3</artifactId>
+			<artifactId>sapjco</artifactId>
 			<version>${sap.jco.version}</version>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.sap.conn.idoc</groupId>
-			<artifactId>sapidoc3</artifactId>
+			<artifactId>sapidoc</artifactId>
 			<version>${sap.idoc.version}</version>
 			<scope>provided</scope>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mulesoft.weave</groupId>
