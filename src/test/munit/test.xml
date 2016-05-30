@@ -23,6 +23,7 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
                 <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_collection_output.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts" method="GET" doc:name="HTTP GET Request">
             <http:request-builder>
@@ -36,7 +37,7 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
             </http:request-builder>
         </http:request>
         <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
-        <dw:transform-message doc:name="extract IDs">
+        <dw:transform-message doc:name="Extract IDs">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
@@ -63,7 +64,7 @@ payload map $.id]]></dw:set-payload>
             </http:request-builder>
         </http:request>
         <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
-        <dw:transform-message doc:name="extract IDs">
+        <dw:transform-message doc:name="Extract IDs">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
@@ -75,7 +76,7 @@ payload map $.id]]></dw:set-payload>
     <munit:test name="test-get:/accounts:system-api-configTest-no-queryParams-provided" description="MUnit Test">
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts" method="GET" doc:name="HTTP GET Request"/>
         <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
-        <dw:transform-message doc:name="tranform to java object">
+        <dw:transform-message doc:name="Tranform payload to java object">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
@@ -86,23 +87,26 @@ payload]]></dw:set-payload>
     <munit:test name="test-post:/accounts:application/json:system-api-configTest" description="Test" >
         <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerGroup">
             <mock:with-attributes>
-                <mock:with-attribute name="doc:name" whereValue="#['get Account Group from SAP']"/>
+                <mock:with-attribute name="doc:name" whereValue="#['Get Account Group from SAP']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('get_customer_details_output_success.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerNumber">
             <mock:with-attributes>
-                <mock:with-attribute name="doc:name" whereValue="#['get Next Customer Number from SAP']"/>
+                <mock:with-attribute name="doc:name" whereValue="#['Get Next Customer Number from SAP']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_getintnumber_output.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <mock:when messageProcessor=".*:.*" doc:name="Mock insertCustomer">
             <mock:with-attributes>
-                <mock:with-attribute name="doc:name" whereValue="#['insert Customer in SAP']"/>
+                <mock:with-attribute name="doc:name" whereValue="#['Insert Customer in SAP']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[]"/>
+
         </mock:when>
-        <dw:transform-message doc:name="set payload">
+        <dw:transform-message doc:name="Set payload">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
@@ -132,12 +136,14 @@ payload]]></dw:set-payload>
                 <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_success.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerDetails">
             <mock:with-attributes>
                 <mock:with-attribute name="doc:name" whereValue="#['Get additional details of customer']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('get_customer_details_output_success.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="GET" doc:name="HTTP GET Request">
             <http:request-builder>
@@ -152,12 +158,14 @@ payload]]></dw:set-payload>
                 <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_success.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <mock:when messageProcessor=".*:.*" doc:name="Mock Delete Customer">
             <mock:with-attributes>
                 <mock:with-attribute name="doc:name" whereValue="#['Delete Customer']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[]"/>
+
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="DELETE" doc:name="HTTP DELETE Request">
             <http:request-builder>
@@ -172,6 +180,7 @@ payload]]></dw:set-payload>
                 <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_not_found.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="DELETE" doc:name="HTTP DELETE Request">
             <http:request-builder>
@@ -187,20 +196,23 @@ payload]]></dw:set-payload>
                 <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_success.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <mock:when messageProcessor=".*:.*" doc:name="Mock getCustomerGroup">
             <mock:with-attributes>
-                <mock:with-attribute name="doc:name" whereValue="#['get Account Group from SAP']"/>
+                <mock:with-attribute name="doc:name" whereValue="#['Get Account Group from SAP']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('get_customer_details_output_success.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <mock:when messageProcessor=".*:.*" doc:name="Mock updateCustomer">
             <mock:with-attributes>
-                <mock:with-attribute name="doc:name" whereValue="#['update Customer in SAP']"/>
+                <mock:with-attribute name="doc:name" whereValue="#['Update Customer in SAP']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[]"/>
+
         </mock:when>
-        <dw:transform-message doc:name="set payload">
+        <dw:transform-message doc:name="Set payload">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
@@ -240,6 +252,7 @@ payload]]></dw:set-payload>
                 <mock:with-attribute name="doc:name" whereValue="#['BAPI_CUSTOMER_FIND']"/>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_not_found.xml', null)]" mimeType="application/xml"/>
+
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="GET" doc:name="HTTP GET Request">
             <http:request-builder>
@@ -256,7 +269,7 @@ payload]]></dw:set-payload>
             </mock:with-attributes>
             <mock:then-return payload="#[org.mule.util.IOUtils.getResourceAsString('bapi_customer_find_output_not_found.xml', null)]" mimeType="application/xml"/>
         </mock:when>
-        <dw:transform-message doc:name="set payload">
+        <dw:transform-message doc:name="Set payload">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
