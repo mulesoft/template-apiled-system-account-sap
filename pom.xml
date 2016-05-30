@@ -5,31 +5,35 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.mule.templates</groupId>
 	<artifactId>template-apiled-system-account-sap</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<packaging>mule</packaging>
 	<name>template-apiled-system-account-sap</name>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-		<mule.version>3.8.0</mule.version>
-		<mule.tools.version>1.1</mule.tools.version>
-
-		<munit.version>1.2.0</munit.version>
-		<mule.munit.support.version>3.8.0</mule.munit.support.version>
-		
 		<sap.jco.version>3.0.13</sap.jco.version>
 		<sap.idoc.version>3.0.12</sap.idoc.version>
+		<skip.readme.generation>true</skip.readme.generation>
 	</properties>
+
+	<parent>
+		<groupId>org.mule.templates</groupId>
+		<artifactId>templates-tooling-parent-pom</artifactId>
+		<version>1.3.1</version>
+	</parent>
+
+	<scm>
+		<connection>scm:git:https://github.com/mulesoft/template-apiled-system-account-sap.git</connection>
+		<developerConnection>scm:git:https://github.com/mulesoft/template-apiled-system-account-sap.git</developerConnection>
+		<url>https://github.com/mulesoft/template-apiled-system-account-sap</url>
+		<tag>HEAD</tag>
+	</scm>
+
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.mule.tools.maven</groupId>
-				<artifactId>mule-app-maven-plugin</artifactId>
-				<version>${mule.tools.version}</version>
-				<extensions>true</extensions>
+				<groupId>org.mule.tools</groupId>
+				<artifactId>maven-mule-plugin</artifactId>
 				<configuration>
 					<copyToAppsDirectory>true</copyToAppsDirectory>
 					<inclusions>
@@ -49,52 +53,23 @@
 							<groupId>com.sap.conn.idoc</groupId>
 							<artifactId>sapidoc</artifactId>
 						</inclusion>
-						<inclusion>
-							<groupId>org.mule.modules</groupId>
-							<artifactId>mule-module-extensions-support</artifactId>
-						</inclusion>
-						<inclusion>
-							<groupId>org.mule.modules</groupId>
-							<artifactId>mule-module-extensions-spring-support</artifactId>
-						</inclusion>
 					</inclusions>
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.1</version>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.6</version>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>project</descriptorRef>
-					</descriptorRefs>
+					<argLine>-Djava.library.path=${project.basedir}/libraries/SAP.${sap.jco.version}</argLine>
+					<classpathDependencyExcludes>
+						<classpathDependencyExcludes>com.sap.conn.jco:sapjco</classpathDependencyExcludes>
+						<classpathDependencyExcludes>com.sap.conn.idoc:sapidoc</classpathDependencyExcludes>
+					</classpathDependencyExcludes>
+					<additionalClasspathElements>
+						<additionalClasspathElement>${project.basedir}/libraries/SAP.${sap.jco.version}/sapjco3.jar</additionalClasspathElement>
+						<additionalClasspathElement>${project.basedir}/libraries/SAP.${sap.idoc.version}/sapidoc3.jar</additionalClasspathElement>
+					</additionalClasspathElements>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<id>add-resource</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>add-resource</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>src/main/app/</directory>
-								</resource>
-								<resource>
-									<directory>mappings/</directory>
-								</resource>
-								<resource>
-									<directory>src/main/api/</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.mulesoft.munit.tools</groupId>
@@ -123,6 +98,14 @@
 			</plugin>
 
 		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/api/</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources/</directory>
+			</resource>
+		</resources>
 		<testResources>
 			<testResource>
 				<directory>src/test/munit</directory>
@@ -136,80 +119,34 @@
 
 	<!-- Mule Dependencies -->
 	<dependencies>
-		<!-- Xml configuration -->
-		<dependency>
-			<groupId>com.mulesoft.muleesb</groupId>
-			<artifactId>mule-core-ee</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- Xml configuration -->
-		<dependency>
-			<groupId>com.mulesoft.muleesb.modules</groupId>
-			<artifactId>mule-module-spring-config-ee</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- Mule Transports -->
-		<dependency>
-			<groupId>org.mule.transports</groupId>
-			<artifactId>mule-transport-file</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.transports</groupId>
-			<artifactId>mule-transport-http</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.mulesoft.muleesb.transports</groupId>
-			<artifactId>mule-transport-jdbc-ee</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.mulesoft.muleesb.transports</groupId>
-			<artifactId>mule-transport-jms-ee</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.transports</groupId>
-			<artifactId>mule-transport-vm</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- Mule Modules -->
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-module-scripting</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-module-xml</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- for testing -->
-		<dependency>
-			<groupId>org.mule.tests</groupId>
-			<artifactId>mule-tests-functional</artifactId>
-			<version>${mule.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-module-apikit</artifactId>
 			<version>${mule.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mulesoft.muleesb.transports</groupId>
-			<artifactId>mule-transport-sap</artifactId>
-			<version>2.2.8</version>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-module-spring-config</artifactId>
+			<version>${mule.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.weave</groupId>
+			<artifactId>mule-plugin-weave_2.11</artifactId>
+			<version>${mule.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-module-http</artifactId>
+			<version>${mule.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-module-json</artifactId>
+			<version>${mule.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mulesoft.munit</groupId>
@@ -224,15 +161,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-module-extensions-support</artifactId>
-			<version>${mule.version}</version>
+			<groupId>com.mulesoft.muleesb.transports</groupId>
+			<artifactId>mule-transport-sap</artifactId>
+			<version>${sap.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-module-extensions-spring-support</artifactId>
-			<version>${mule.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.sap.conn.jco</groupId>
 			<artifactId>sapjco3</artifactId>
@@ -248,12 +181,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-module-spring-config</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.mulesoft.weave</groupId>
 			<artifactId>mule-plugin-weave_2.11</artifactId>
 			<version>${mule.version}</version>
@@ -265,33 +192,24 @@
 		<repository>
 			<id>mulesoft-releases</id>
 			<name>MuleSoft Releases Repository</name>
-			<url>https://repository.mulesoft.org/nexus/content/repositories/releases/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>mule-ee-releases</id>
-			<name>MuleSoft Releases EE Repository</name>
-			<url>https://repository.mulesoft.org/nexus/content/repositories/releases-ee/</url>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/releases/
+			</url>
 			<layout>default</layout>
 		</repository>
 		<repository>
 			<id>mulesoft-snapshots</id>
 			<name>MuleSoft Snapshots Repository</name>
-			<url>https://repository.mulesoft.org/nexus/content/repositories/snapshots/</url>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/snapshots/
+			</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>mule-ee-releases</id>
+			<name>MuleSoft Releases EE Repository</name>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/releases-ee/
+			</url>
 			<layout>default</layout>
 		</repository>
 	</repositories>
-	
-	<pluginRepositories>
-		<pluginRepository>
-			<id>mulesoft-release</id>
-			<name>mulesoft release repository</name>
-			<layout>default</layout>
-			<url>http://repository.mulesoft.org/releases/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
 
 </project>
