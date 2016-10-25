@@ -158,14 +158,15 @@ if (!payload.isEmpty() && flowVars.queryParams.orderBy != null) {
 
 //pagination
 if (!payload.isEmpty()   &&   flowVars.queryParams.maxResults != null ) {
+	int maxResults = Integer.parseInt(flowVars.queryParams.maxResults);
 	
 	// return empty array when out of bounds or no results expected
-	if (flowVars.queryParams.maxResults == 0  ||  (flowVars.queryParams.offset != null && flowVars.queryParams.offset > payload.size() - 1) ) {
+	if (maxResults == 0  ||  (flowVars.queryParams.offset != null && Integer.parseInt(flowVars.queryParams.offset) > payload.size() - 1) ) {
 		payload = [];
 
 	} else {	
-			offset = (flowVars.queryParams.offset != null)  ?  flowVars.queryParams.offset  :  0;
-			limit  =    (Math.addExact(offset , flowVars.queryParams.maxResults)   >=   payload.size())    ?   payload.size() - 1   :    (Math.addExact(offset, flowVars.queryParams.maxResults) - 1);
+			int offset = (flowVars.queryParams.offset != null)  ?  Integer.parseInt(flowVars.queryParams.offset)  :  0;
+			int limit  =    ((offset + maxResults)   >=   payload.size())    ?   payload.size() - 1   :    ((offset + maxResults) - 1);
 			dwScript =  "payload[" + offset +   ".." + limit + "]"; 
 			payload = dw(dwScript);
 	}
@@ -178,6 +179,7 @@ if (!payload.isEmpty()   &&   flowVars.queryParams.maxResults != null ) {
     
     <flow name="post:/accounts:application/json:system-api-config">
         <set-property propertyName="Content-Type" value="application/json" doc:name="Set content-type"/>
+        <byte-array-to-object-transformer doc:name="Byte Array to Object"/>
         <set-variable variableName="input" value="#[payload]" encoding="UTF-8" mimeType="application/json" doc:name="Save input"/>
         <enricher source="#[payload.AccountGroup]" target="#[flowVars.accountGroup]" doc:name="Save 'accountGroup'" doc:description="Query account group from the SAP by a customer Id. ">
             <processor-chain doc:name="Processor Chain">

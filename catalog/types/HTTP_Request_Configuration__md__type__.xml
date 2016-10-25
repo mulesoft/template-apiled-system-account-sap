@@ -17,27 +17,26 @@
         <metaDataModelPropertiesManager>
           <properties>
             <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
-              <exampleContent>{
-  &quot;id&quot;: &quot;0000301980&quot;,
-  &quot;nativeId&quot;: &quot;&quot;,
-  &quot;name&quot;: &quot;Jason Bourne&quot;,
-  &quot;phone&quot;: &quot;1-(318)596-8473&quot;,
-  &quot;fax&quot;: &quot;1-(318)596-8474&quot;,
-  &quot;email&quot;: &quot;test@example.com&quot;,
-  &quot;billingStreet&quot;: &quot;Pleasure 4598&quot;,
-  &quot;billingCity&quot;: &quot;Shreveport&quot;,
-  &quot;billingState&quot;: &quot;Louisiana&quot;,
-  &quot;billingPostalCode&quot;: &quot;71105&quot;,
-  &quot;billingCountry&quot;: &quot;United States&quot;,
-  &quot;shippingStreet&quot;: &quot;Autumn Leaf 3&quot;,
-  &quot;shippingCity&quot;: &quot;Jackson&quot;,
-  &quot;shippingState&quot;: &quot;Mississippi&quot;,
-  &quot;shippingPostalCode&quot;: &quot;39204&quot;,
-  &quot;shippingCountry&quot;: &quot;United States&quot;,
-  &quot;createdDate&quot; : &quot;2016-03-24T15:00:00.000Z&quot;,
-  &quot;lastModifiedDate&quot; : &quot;2016-03-24T15:00:00.000Z&quot;,
-  &quot;lastModifiedById&quot; : &quot;123456&quot;
-}
+              <exampleContent>{&#xd;
+  &quot;id&quot;: &quot;0000301980&quot;,&#xd;
+  &quot;nativeId&quot;: &quot;&quot;,&#xd;
+  &quot;name&quot;: &quot;Jason Bourne&quot;,&#xd;
+  &quot;phone&quot;: &quot;1-(318)596-8473&quot;,&#xd;
+  &quot;email&quot;: &quot;test@example.com&quot;,&#xd;
+  &quot;billingStreet&quot;: &quot;Pleasure 4598&quot;,&#xd;
+  &quot;billingCity&quot;: &quot;Shreveport&quot;,&#xd;
+  &quot;billingState&quot;: &quot;Louisiana&quot;,&#xd;
+  &quot;billingPostalCode&quot;: &quot;71105&quot;,&#xd;
+  &quot;billingCountry&quot;: &quot;United States&quot;,&#xd;
+  &quot;shippingStreet&quot;: &quot;Autumn Leaf 3&quot;,&#xd;
+  &quot;shippingCity&quot;: &quot;Jackson&quot;,&#xd;
+  &quot;shippingState&quot;: &quot;Mississippi&quot;,&#xd;
+  &quot;shippingPostalCode&quot;: &quot;39204&quot;,&#xd;
+  &quot;shippingCountry&quot;: &quot;United States&quot;,&#xd;
+  &quot;createdDate&quot; : &quot;2016-03-24T15:00:00.000Z&quot;,&#xd;
+  &quot;lastModifiedDate&quot; : &quot;2016-03-24T15:00:00.000Z&quot;,&#xd;
+  &quot;lastModifiedById&quot; : &quot;123456&quot;&#xd;
+}&#xd;
 </exampleContent>
             </org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
             <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
@@ -580,25 +579,33 @@
         <metaDataModelPropertiesManager>
           <properties>
             <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
-              <exampleContent>{
-  &quot;name&quot;: &quot;Eduard Walker&quot;,
-  &quot;phone&quot;: &quot;1-(318)596-8473&quot;,
-  &quot;email&quot;: &quot;ewalker0@liveinternet.ru&quot;,
-  &quot;billingStreet&quot;: &quot;Pleasure 4598&quot;,
-  &quot;billingCity&quot;: &quot;Shreveport&quot;,
-  &quot;billingState&quot;: &quot;Louisiana&quot;,
-  &quot;billingPostalCode&quot;: &quot;71105&quot;,
-  &quot;billingCountry&quot;: &quot;United States&quot;,
-  &quot;shippingStreet&quot;: &quot;Autumn Leaf 3&quot;,
-  &quot;shippingCity&quot;: &quot;Jackson&quot;,
-  &quot;shippingState&quot;: &quot;Mississippi&quot;,
-  &quot;shippingPostalCode&quot;: &quot;39204&quot;,
-  &quot;shippingCountry&quot;: &quot;United States&quot;
-}
-</exampleContent>
+              <exampleContent>{&#xd;
+  &quot;name&quot;: &quot;Eduard Walker&quot;,&#xd;
+  &quot;phone&quot;: &quot;1-(318)596-8473&quot;,&#xd;
+  &quot;email&quot;: &quot;ewalker0@liveinternet.ru&quot;,&#xd;
+  &quot;billingStreet&quot;: &quot;Pleasure 4598&quot;,&#xd;
+  &quot;billingCity&quot;: &quot;Shreveport&quot;,&#xd;
+  &quot;billingState&quot;: &quot;Louisiana&quot;,&#xd;
+  &quot;billingPostalCode&quot;: &quot;71105&quot;,&#xd;
+  &quot;billingCountry&quot;: &quot;United States&quot;,&#xd;
+  &quot;shippingStreet&quot;: &quot;Autumn Leaf 3&quot;,&#xd;
+  &quot;shippingCity&quot;: &quot;Jackson&quot;,&#xd;
+  &quot;shippingState&quot;: &quot;Mississippi&quot;,&#xd;
+  &quot;shippingPostalCode&quot;: &quot;39204&quot;,&#xd;
+  &quot;shippingCountry&quot;: &quot;United States&quot;&#xd;
+}</exampleContent>
             </org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
             <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
-              <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey" reference="../../../../../org.mule.common.metadata.DefaultMetaDataKey"/>
+              <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
+                <id>POST:/accounts_request</id>
+                <displayName>POST:/accounts_request</displayName>
+                <category>DEFAULT</category>
+                <metaDataKeyPropertiesManager>
+                  <properties>
+                    <org.mule.common.metadata.key.property.dsql.DsqlFromMetaDataKeyProperty/>
+                  </properties>
+                </metaDataKeyPropertiesManager>
+              </metaDataKey>
               <derivedStructure>false</derivedStructure>
               <generatedStructure>false</generatedStructure>
             </org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
@@ -1217,28 +1224,21 @@
         <metaDataModelPropertiesManager>
           <properties>
             <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
-              <exampleContent>{
-  &quot;id&quot;: &quot;0000301980&quot;,
-  &quot;nativeId&quot;: &quot;&quot;,
-  &quot;name&quot;: &quot;Jason Bourne&quot;,
-  &quot;phone&quot;: &quot;1-(318)596-8473&quot;,
-  &quot;fax&quot;: &quot;1-(318)596-8474&quot;,
-  &quot;email&quot;: &quot;test@example.com&quot;,
-  &quot;billingStreet&quot;: &quot;Pleasure 4598&quot;,
-  &quot;billingCity&quot;: &quot;Shreveport&quot;,
-  &quot;billingState&quot;: &quot;Louisiana&quot;,
-  &quot;billingPostalCode&quot;: &quot;71105&quot;,
-  &quot;billingCountry&quot;: &quot;United States&quot;,
-  &quot;shippingStreet&quot;: &quot;Autumn Leaf 3&quot;,
-  &quot;shippingCity&quot;: &quot;Jackson&quot;,
-  &quot;shippingState&quot;: &quot;Mississippi&quot;,
-  &quot;shippingPostalCode&quot;: &quot;39204&quot;,
-  &quot;shippingCountry&quot;: &quot;United States&quot;,
-  &quot;createdDate&quot; : &quot;2016-03-24T15:00:00.000Z&quot;,
-  &quot;lastModifiedDate&quot; : &quot;2016-03-24T15:00:00.000Z&quot;,
-  &quot;lastModifiedById&quot; : &quot;123456&quot;
-}
-</exampleContent>
+              <exampleContent>{&#xd;
+  &quot;name&quot;: &quot;Jason Bourne&quot;,&#xd;
+  &quot;phone&quot;: &quot;1-(318)596-8473&quot;,&#xd;
+  &quot;email&quot;: &quot;test@example.com&quot;,&#xd;
+  &quot;billingStreet&quot;: &quot;Pleasure 4598&quot;,&#xd;
+  &quot;billingCity&quot;: &quot;Shreveport&quot;,&#xd;
+  &quot;billingState&quot;: &quot;Louisiana&quot;,&#xd;
+  &quot;billingPostalCode&quot;: &quot;71105&quot;,&#xd;
+  &quot;billingCountry&quot;: &quot;United States&quot;,&#xd;
+  &quot;shippingStreet&quot;: &quot;Autumn Leaf 3&quot;,&#xd;
+  &quot;shippingCity&quot;: &quot;Jackson&quot;,&#xd;
+  &quot;shippingState&quot;: &quot;Mississippi&quot;,&#xd;
+  &quot;shippingPostalCode&quot;: &quot;39204&quot;,&#xd;
+  &quot;shippingCountry&quot;: &quot;United States&quot;&#xd;
+}</exampleContent>
             </org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
             <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
               <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
