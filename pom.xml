@@ -12,6 +12,7 @@
 		<sap.jco.version>3.0.13</sap.jco.version>
 		<sap.idoc.version>3.0.12</sap.idoc.version>
 		<skip.readme.generation>true</skip.readme.generation>
+		<mule.version>3.8.1</mule.version>
 	</properties>
 
 	<parent>
@@ -122,11 +123,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.mulesoft.weave</groupId>
-			<artifactId>mule-plugin-weave_2.11</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
+            <groupId>com.mulesoft.weave</groupId>
+            <artifactId>mule-plugin-weave</artifactId>
+            <version>${mule.version}</version>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-module-http</artifactId>
@@ -175,13 +176,7 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.3.2</version>
 		</dependency>
-		<dependency>
-			<groupId>com.mulesoft.weave</groupId>
-			<artifactId>mule-plugin-weave_2.11</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<repositories>
 		<repository>

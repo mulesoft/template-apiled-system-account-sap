@@ -147,7 +147,7 @@ payload]]></dw:set-payload>
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="GET" doc:name="HTTP GET Request">
             <http:request-builder>
-                <http:uri-param paramName="id" value="0000301981"/>
+                <http:uri-param paramName="id" value="'0000301981'"/>
             </http:request-builder>
         </http:request>
         <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="Assert that http.status eq 200"/>
@@ -169,7 +169,7 @@ payload]]></dw:set-payload>
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="DELETE" doc:name="HTTP DELETE Request">
             <http:request-builder>
-                <http:uri-param paramName="id" value="0000301981"/>
+                <http:uri-param paramName="id" value="'0000301981'"/>
             </http:request-builder>
         </http:request>
         <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(204))]" doc:name="Assert that http.status eq 204"/>
@@ -184,7 +184,7 @@ payload]]></dw:set-payload>
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="DELETE" doc:name="HTTP DELETE Request">
             <http:request-builder>
-                <http:uri-param paramName="id" value="0000000000"/>
+                <http:uri-param paramName="id" value="'0000000000'"/>
             </http:request-builder>
             <http:success-status-code-validator values="404"/>
         </http:request>
@@ -241,7 +241,7 @@ payload]]></dw:set-payload>
         </dw:transform-message>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="PUT" doc:name="HTTP PUT Request">
             <http:request-builder>
-                <http:uri-param paramName="id" value="0000301981"/>
+                <http:uri-param paramName="id" value="'0000301981'"/>
             </http:request-builder>
         </http:request>
         <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(204))]" doc:name="Assert that http.status eq 204"/>
@@ -256,7 +256,7 @@ payload]]></dw:set-payload>
         </mock:when>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="GET" doc:name="HTTP GET Request">
             <http:request-builder>
-                <http:uri-param paramName="id" value="0000000000"/>
+                <http:uri-param paramName="id" value="'0000000000'"/>
             </http:request-builder>
             <http:success-status-code-validator values="404"/>
         </http:request>
@@ -298,7 +298,7 @@ payload]]></dw:set-payload>
         </dw:transform-message>
         <http:request config-ref="HTTP_Request_Configuration" path="/accounts/{id}" method="PUT" doc:name="HTTP PUT Request">
             <http:request-builder>
-                <http:uri-param paramName="id" value="0000000000"/>
+                <http:uri-param paramName="id" value="'0000000000'"/>
             </http:request-builder>
             <http:success-status-code-validator values="404"/>
         </http:request>
