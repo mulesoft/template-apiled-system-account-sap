@@ -348,6 +348,14 @@ DEBMAS01 : {
 }]]></dw:set-payload>
                 </dw:transform-message>
                 <sap:outbound-endpoint exchange-pattern="request-response" connector-ref="SAP" type="idoc" functionName="DEBMAS01" xmlVersion="2" outputXml="true" responseTimeout="10000" doc:name="Update Customer in SAP"/>
+                <dw:transform-message doc:name="Prepare JSON output structure">
+					<dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	status: "OK"
+}]]></dw:set-payload>
+				</dw:transform-message>
             </when>
             <otherwise>
                 <set-property propertyName="http.status" value="#[404]" doc:name="Resource Not Found"/>
@@ -372,7 +380,14 @@ DEBMAS01 : {
 </ZCAFM_CUSTOMER_DELETE>
 ]]></sap:definition>
                 </sap:outbound-endpoint>
-
+				<dw:transform-message doc:name="Prepare JSON output structure">
+                	<dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	status: "OK"
+}]]></dw:set-payload>
+                </dw:transform-message>
             </when>
             <otherwise>
                 <set-property propertyName="http.status" value="#[404]" doc:name="Resource Not Found"/>
