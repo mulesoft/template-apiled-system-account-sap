@@ -112,11 +112,13 @@ flowVars.output + payload]]></dw:set-variable>
 payload.ZSDFM_CUSTOMER_GETLIST.tables.T_KNA1.*row map {
 	id: $.KUNNR,
 	name: $.NAME1,
-	billingStreet: $.STRAS,
-	billingCity: $.ORT01,
-	billingPostalCode: $.PSTLZ,
-	billingState: "",
-	billingCountry: $.LAND1,
+	billingAddress: {
+		street: $.STRAS,
+		city: $.ORT01,
+		postalCode: $.PSTLZ,
+		state: "",
+		country: $.LAND1
+	},
 	lastModifiedDate: $."LAST_MODIF_DATE",
 	lastModifiedById: $.AENAM
 	
@@ -243,9 +245,9 @@ DEBMAS01 : {
 			KTOKD       : flowVars.accountGroup       when (flowVars.accountGroup != null)   otherwise p('sap.default.accountGroup'),
 			LAND1       : "SK",
 			NAME1       : flowVars.input.name               when ((sizeOf flowVars.input.name) <= 20)    otherwise flowVars.input.name[0..19],
-			(ORT01      : flowVars.input.billingCity)       when (flowVars.input.billingCity != null),
-			(PSTLZ      : flowVars.input.billingPostalCode) when (flowVars.input.billingPostalCode != null),
-			(STRAS      : flowVars.input.billingStreet)     when (flowVars.input.billingStreet != null),
+			(ORT01      : flowVars.input.billingAddress.city)       when (flowVars.input.billingAddress.city != null),
+			(PSTLZ      : flowVars.input.billingAddress.postalCode) when (flowVars.input.billingAddress.postalCode != null),
+			(STRAS      : flowVars.input.billingAddress.street)     when (flowVars.input.billingAddress.street != null),
 			(TELF1      : flowVars.input.phone)             when (flowVars.input.phone != null),
 			SPRAS       : "E",
 			"SPRAS_ISO" : "EN"
@@ -337,9 +339,9 @@ DEBMAS01 : {
 			KTOKD       : flowVars.accountGroup       when (flowVars.accountGroup != null)   otherwise p('sap.default.accountGroup'),
 			LAND1       : "US",
 			NAME1       : flowVars.input.name               when ((sizeOf flowVars.input.name) <= 20)    otherwise flowVars.input.name[0..19],
-			(ORT01      : flowVars.input.billingCity)       when (flowVars.input.billingCity != null),
-			(PSTLZ      : flowVars.input.billingPostalCode) when (flowVars.input.billingPostalCode != null),
-			(STRAS      : flowVars.input.billingStreet)     when (flowVars.input.billingStreet != null),
+			(ORT01      : flowVars.input.billingAddress.city)       when (flowVars.input.billingAddress.city != null),
+			(PSTLZ      : flowVars.input.billingAddress.postalCode) when (flowVars.input.billingAddress.postalCode != null),
+			(STRAS      : flowVars.input.billingAddress.street)     when (flowVars.input.billingAddress.street != null),
 			(TELF1      : flowVars.input.phone)             when (flowVars.input.phone != null),
 			SPRAS       : "E",
 			"SPRAS_ISO" : "EN"
@@ -409,15 +411,17 @@ DEBMAS01 : {
 %output application/java
 ---
 (payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1".*row map {
-	id                : $.KUNNR,
-	name              : $.NAME1,
-	billingStreet     : $.STRAS,
-	billingCity       : $.ORT01,
-	billingPostalCode : $.PSTLZ,
-	billingState      : null,
-	billingCountry    : $.LAND1,
-	lastModifiedDate  : $."LAST_MODIF_DATE",
-	lastModifiedById  : $.AENAM
+	id              	: $.KUNNR,
+	name            	: $.NAME1,
+	billingAddress: {
+		street     		: $.STRAS,
+		city       		: $.ORT01,
+		postalCode 		: $.PSTLZ,
+		state      		: null,
+		country    		: $.LAND1
+	},
+	lastModifiedDate	: $."LAST_MODIF_DATE",
+	lastModifiedById	: $.AENAM
 })[0] when payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1" is :object otherwise null]]></dw:set-payload>
         </dw:transform-message>
     </sub-flow>

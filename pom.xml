@@ -12,13 +12,13 @@
 		<sap.jco.version>3.0.13</sap.jco.version>
 		<sap.idoc.version>3.0.12</sap.idoc.version>
 		<skip.readme.generation>true</skip.readme.generation>
-		<mule.version>3.8.1</mule.version>
+		<sap.version>2.2.8</sap.version>
 	</properties>
 
 	<parent>
 		<groupId>org.mule.templates</groupId>
 		<artifactId>templates-tooling-parent-pom</artifactId>
-		<version>1.3.1</version>
+		<version>1.3.7</version>
 	</parent>
 
 	<scm>
@@ -32,8 +32,8 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.mule.tools</groupId>
-				<artifactId>maven-mule-plugin</artifactId>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-app-maven-plugin</artifactId>
 				<configuration>
 					<copyToAppsDirectory>true</copyToAppsDirectory>
 					<inclusions>
