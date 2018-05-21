@@ -312,7 +312,7 @@ output application/xml
 				"row": {
 					"TABNAME": "KNA1",
 					"FIELDNAME": "NAME1",
-					"FIELDVALUE": "*" ++ vars.queryParams.name ++ "*"
+					"FIELDVALUE": if (vars.queryParams.match == "like") ("*" ++ vars.queryParams.name ++ "*") else vars.queryParams.name
 				}
 			}
 		}
@@ -335,17 +335,24 @@ payload.BAPI_CUSTOMER_FIND.tables.RESULT_TAB.*row filter ($.CUSTOMER != "" and $
 				<set-variable value="#[[]]" doc:name="Initialize output array" doc:id="7f9d2e48-7411-40d3-a0b7-1559297a1825" variableName="result"/>
 				<foreach doc:name="For Each Customer" doc:id="286f8244-f5f3-4254-bcf6-8c8195bcca2f" collection="payload">
 					<set-variable value="#[payload.id]" doc:name="Set current ID" doc:id="c1f70e4a-f028-4ec4-bfe6-8d2bac4f4c05" variableName="id"/>
-					<flow-ref doc:name="Call getCustomerDetails" doc:id="85a4d3a2-2ec2-445f-9b02-a2ed84cdc7e0" name="getCustomerDetails"/>
-					<ee:transform doc:name="Add customer to result array" doc:id="fc4fdab5-d7b7-4e2c-9f70-225fbaa078b4" >
-						<ee:message >
+					<choice doc:name="Check id" doc:id="a2944b73-cef7-430f-bdde-7119fa9de197" >
+						<when expression="#[vars.id != null]" >
+							<flow-ref doc:name="getCustomerDetails" doc:id="85a4d3a2-2ec2-445f-9b02-a2ed84cdc7e0" name="getCustomerDetails" />
+							<ee:transform doc:name="Add customer to result array" doc:id="fc4fdab5-d7b7-4e2c-9f70-225fbaa078b4">
+						<ee:message>
 						</ee:message>
-						<ee:variables >
-							<ee:set-variable variableName="result" ><![CDATA[%dw 2.0
+						<ee:variables>
+							<ee:set-variable variableName="result"><![CDATA[%dw 2.0
 output application/java
 ---
 vars.result ++ [payload]]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
+						</when>
+						<otherwise >
+							<logger level="INFO" doc:name="Customer not found" doc:id="904a410f-4a6c-4487-8234-5bf85d8fb632" message="Customer #[payload.name] not found"/>
+						</otherwise>
+					</choice>
 				</foreach>
 				<set-payload value="#[vars.result]" doc:name="Bring output to payload" doc:id="1cbf94d4-64cc-4fed-87ef-dd6fbf2b4a2b" />
 			</when>

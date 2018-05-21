@@ -27,6 +27,14 @@ traits:
         minLength: 0
         maxLength: 255
         required: false
+      match:
+        displayName: The account name matching rule
+        description: |
+          The account name matching rule
+        type: string
+        enum: [like, equals]
+        default: equals
+        required: false
       modifiedAfter:
         displayName: Only those modified after this date
         minLength: 23
