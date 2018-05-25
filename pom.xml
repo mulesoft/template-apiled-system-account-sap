@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.mule.templates</groupId>
         <artifactId>templates-tooling-parent-pom</artifactId>
-        <version>2.1.0-SNAPSHOT</version>
+        <version>2.1.0</version>
     </parent>
 
     <artifactId>template-apiled-system-account-sap</artifactId>
@@ -14,10 +14,6 @@
     <packaging>mule-application</packaging>
 
     <name>template-apiled-system-account-sap</name>
-
-    <properties>
-        <apikit.module.version>1.1.1</apikit.module.version>
-    </properties>
 
     <build>
         <plugins>
@@ -33,6 +29,29 @@
                     </sharedLibraries>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.mulesoft.munit.tools</groupId>
+                <artifactId>munit-maven-plugin</artifactId>
+                <version>${munit.version}</version>
+                <executions>
+                    <execution>
+                        <id>test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                            <goal>coverage-report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <coverage>
+                        <runCoverage>true</runCoverage>
+                        <formats>
+                            <format>html</format>
+                        </formats>
+                    </coverage>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -45,7 +64,6 @@
         <dependency>
             <groupId>org.mule.modules</groupId>
             <artifactId>mule-apikit-module</artifactId>
-            <version>${apikit.module.version}</version>
             <classifier>mule-plugin</classifier>
         </dependency>
         <dependency>
@@ -54,7 +72,31 @@
             <version>${sap.connector.version}</version>
             <classifier>mule-plugin</classifier>
         </dependency>
+
         <!-- Please Add dependencies for SAP libraries -->
+
+        <dependency>
+            <groupId>com.mulesoft.munit</groupId>
+            <artifactId>munit-runner</artifactId>
+            <classifier>mule-plugin</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mulesoft.munit</groupId>
+            <artifactId>munit-tools</artifactId>
+            <classifier>mule-plugin</classifier>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>https://repository.mulesoft.org/releases/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+    
 </project>
