@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:sap="http://www.mulesoft.org/schema/mule/sap" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+    xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+    http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+    http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/current/mule-sap.xsd">
+    <http:listener-config name="system-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+    <apikit:config name="system-api-config" raml="system-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" doc:name="Router"/>
+    <sap:outbound-config name="SAP_Outbound" doc:name="SAP Outbound" doc:id="fd626ca1-187e-4a11-82a9-74605acbbf3c">
+        <sap:simple-connection-provider-connection applicationServerHost="${sap.jco.ashost}"
+            username="${sap.jco.user}" password="${sap.jco.passwd}" systemNumber="${sap.jco.sysnr}" client="${sap.jco.client}" language="${sap.jco.lang}" />
+    </sap:outbound-config>
+
+    <configuration-properties doc:name="Configuration properties" doc:id="c3fcb5c6-cb55-4fe1-a881-7716b5c70cd0"
+        file="common.properties" />
+    <configuration-properties doc:name="Configuration properties" doc:id="674a6931-6133-472e-91d7-e6a979ff4427"
+        file="mule.${mule.env}.properties" />
+    <configuration-properties doc:name="Configuration properties" doc:id="be3b5646-f262-4e3e-bb1f-fcad24af9758"
+        file="mule-artifact.properties" />
+    <flow name="system-api-main">
+        <http:listener config-ref="system-api-httpListenerConfig" path="${api.basePath}/*" doc:name="Listener">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="system-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND" doc:name="On Error Propagate" enableNotifications="true"
+                logException="true">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="system-api-console">
+        <http:listener config-ref="system-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="system-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\accounts\(id):application\json:system-api-config">
+        <set-variable value="#[payload]" doc:name="Save input" doc:id="ed2384ee-9275-45ec-ae88-b25e96ed5ee5" variableName="account"
+            encoding="UTF-8" mimeType="application/json" />
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set id" doc:id="01fb2f01-64d2-4e53-a0d2-612f5b3a0998"
+            variableName="id" />
+        <flow-ref doc:name="checkCustomer" doc:id="427354a4-68c8-4ace-b684-5096c26c30ff" name="checkCustomer" />
+        <choice doc:name="Does customer exist?" doc:id="3f2a2319-3550-429f-b2fa-cf6253a4a4cb">
+            <when expression="#[vars.customerExists]">
+                <ee:transform doc:name="Set XML input" doc:id="69096e07-79f8-4d88-a5f4-52dfa8a75170">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "CUSTOMER_GET_KTOKD": {
+    "import": {
+      "IV_KUNNR": vars.id
+    }
+  }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <sap:execute-synchronous-remote-function-call key="CUSTOMER_GET_KTOKD"
+                    doc:name="Get Account Group from SAP" doc:id="bdce7ef5-28c2-42ce-84e9-d8f3cfa36982" config-ref="SAP_Outbound" />
+                <ee:transform doc:name="Transform CUSTOMER_GET_KTOKD to AccountGroup" doc:id="a5b7613c-0de9-4f16-93fc-cd7ef8d32238">
+                    <ee:message>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="accountGroup"><![CDATA[%dw 2.0
+output application/java
+---
+payload."CUSTOMER_GET_KTOKD".export."EV_KTOKD"]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+                <ee:transform doc:name="Transform Account to DEBMAS01" doc:id="9788a097-e30c-430c-bfbd-63203fb1dd2a">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+DEBMAS01 : {
+	IDOC @(BEGIN : "1") : {
+		"EDI_DC40" @(SEGMENT : "1"):  {
+			TABNAM      : "EDI_DC40",
+			DIRECT      : "2",
+			IDOCTYP     : "DEBMAS01",
+			MESTYP      : "DEBMAS",
+			SNDPOR      : "MULE01_LS",
+			SNDPRT      : "LS",
+			SNDPRN      : "MULE01_LS",
+			RCVPOR      : "T90CLNT090",
+			RCVPRT      : "LS",
+			RCVPRN      : "T90CLNT090"
+		},
+		E1KNA1M @(SEGMENT : "1") : {
+			MSGFN       : "005",
+			KUNNR       : vars.id,
+			KTOKD       : if (vars.accountGroup != null) vars.accountGroup else p('sap.default.accountGroup'),
+			LAND1       : "US",
+			NAME1       : if (sizeOf(vars.account.name) <= 20) vars.account.name else vars.account.name[0 to 19],
+			(ORT01      : vars.account.billingAddress.city) if(vars.account.billingAddress.city != null),
+			(PSTLZ      : vars.account.billingAddress.postalCode) if(vars.account.billingAddress.postalCode != null),
+			(STRAS      : vars.account.billingAddress.street) if(vars.account.billingAddress.street != null),
+			(TELF1      : vars.account.phone) if(vars.account.phone != null),
+			SPRAS       : "E",
+			"SPRAS_ISO" : "EN"
+		}
+	}
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <sap:send key="DEBMAS01" doc:name="Update Customer in SAP" doc:id="703dd3d7-7f69-4b23-86e9-105ddf39b974"
+                    config-ref="SAP_Outbound" />
+                <ee:transform doc:name="Prepare JSON output structure" doc:id="6c9c8624-fb55-4f79-bdc2-300404a21249"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "OK"
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <set-variable value="404" doc:name="Set http status" doc:id="4b495776-234a-48fb-a8f9-b2c3b767868c"
+                    variableName="httpStatus" />
+                <set-payload value='{ "message": "Resource not found" }' doc:name="Account not found" doc:id="f8cfe1b4-f788-42f8-87ac-49ad11081238" />
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="delete:\accounts\(id):system-api-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set id" doc:id="f258b7cc-ac5d-404c-979d-bbea5e8c08e4"
+            variableName="id" />
+        <flow-ref doc:name="checkCustomer" doc:id="e75ed5ee-ee57-4414-a55e-0ea58a474a98" name="checkCustomer" />
+        <choice doc:name="Does customer exist?" doc:id="b41c8e28-3c49-4fc7-b88e-54a388ed9efa">
+            <when expression="#[vars.customerExists]">
+                <ee:transform doc:name="Set XML input" doc:id="140587aa-b5ea-43d6-a131-e33d811fe594">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "ZCAFM_CUSTOMER_DELETE": {
+    "import": {
+      "PI_CUSTOMER": vars.id
+    }
+  }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <sap:execute-synchronous-remote-function-call doc:name="Delete Customer"
+                    doc:id="5c235a49-0975-470e-a46f-49b5f620572c" config-ref="SAP_Outbound" key="ZCAFM_CUSTOMER_DELETE" />
+                <ee:transform doc:name="Prepare JSON output structure" doc:id="6c9c8624-fb55-4f79-bdc2-300404a21249"
+                    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "OK"
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <set-variable value="404" doc:name="Set http status" doc:id="4b495776-234a-48fb-a8f9-b2c3b767868c"
+                    variableName="httpStatus" />
+                <set-payload value='{ "message": "Resource not found" }' doc:name="Account not found" doc:id="f8cfe1b4-f788-42f8-87ac-49ad11081238" />
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="get:\accounts\(id):system-api-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set id" doc:id="f258b7cc-ac5d-404c-979d-bbea5e8c08e4"
+            variableName="id" />
+        <flow-ref doc:name="checkCustomer" doc:id="e75ed5ee-ee57-4414-a55e-0ea58a474a98" name="checkCustomer" />
+        <choice doc:name="Does customer exist?" doc:id="e5e67098-5453-410c-bb07-c2c8a6d7109a">
+            <when expression="#[vars.customerExists]">
+                <flow-ref doc:name="getCustomerDetails" doc:id="b5031330-1a42-4724-b483-4b2b180b0fb5" name="getCustomerDetails" />
+                <ee:transform doc:name="Object to JSON" doc:id="566ed575-06ee-4c8c-af2a-feb4abdc328f">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <set-variable value="404" doc:name="Set http status" doc:id="4b495776-234a-48fb-a8f9-b2c3b767868c"
+                    variableName="httpStatus" />
+                <set-payload value='{ "message": "Resource not found" }' doc:name="Account not found" doc:id="f8cfe1b4-f788-42f8-87ac-49ad11081238" />
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="get:\accounts:system-api-config">
+        <set-variable value="#[attributes.queryParams]" doc:name="Save queryParams" doc:id="dcc429bf-eda1-42a8-b910-839758e78879"
+            variableName="queryParams" />
+        <choice doc:name="Check params" doc:id="fdaec80d-477e-4d9e-a5f0-c8a6b905ec20">
+            <when expression="#[vars.queryParams.name != null]">
+                <ee:transform doc:name="Prepare BAPI_CUSTOMER_FIND request" doc:id="003c697b-9a44-4cf6-af54-435b82f8868c">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	"BAPI_CUSTOMER_FIND": {
+		"import": {
+			"MAX_CNT" : "0",
+			"PL_HOLD" : "X"
+		},
+		"tables": {
+			"SELOPT_TAB": {
+				"row": {
+					"TABNAME": "KNA1",
+					"FIELDNAME": "NAME1",
+					"FIELDVALUE": if (vars.queryParams.match == "like") ("*" ++ vars.queryParams.name ++ "*") else vars.queryParams.name
+				}
+			}
+		}
+	}
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <sap:execute-synchronous-remote-function-call doc:name="BAPI_CUSTOMER_FIND"
+                    doc:id="cb572a6f-bade-40cb-8b92-ed75d7ae55b0" config-ref="SAP_Outbound" key="BAPI_CUSTOMER_FIND" />
+                <ee:transform doc:name="Transform response to Java Maps" doc:id="5192ecad-ee84-458f-8529-e5f67e950912">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload.BAPI_CUSTOMER_FIND.tables.RESULT_TAB.*row filter ($.CUSTOMER != "" and $.DEL_FLAG_G != "X") map {
+	name : $.FIELDVALUE,
+	id   : $.CUSTOMER
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <set-variable value="#[[]]" doc:name="Initialize output array" doc:id="7f9d2e48-7411-40d3-a0b7-1559297a1825"
+                    variableName="result" />
+                <foreach doc:name="For Each Customer" doc:id="286f8244-f5f3-4254-bcf6-8c8195bcca2f" collection="payload">
+                    <set-variable value="#[payload.id]" doc:name="Set current ID" doc:id="c1f70e4a-f028-4ec4-bfe6-8d2bac4f4c05"
+                        variableName="id" />
+                    <choice doc:name="Check id" doc:id="a2944b73-cef7-430f-bdde-7119fa9de197">
+                        <when expression="#[vars.id != null]">
+                            <flow-ref doc:name="getCustomerDetails" doc:id="85a4d3a2-2ec2-445f-9b02-a2ed84cdc7e0" name="getCustomerDetails" />
+                            <ee:transform doc:name="Add customer to result array" doc:id="fc4fdab5-d7b7-4e2c-9f70-225fbaa078b4">
+                                <ee:message>
+                                </ee:message>
+                                <ee:variables>
+                                    <ee:set-variable variableName="result"><![CDATA[%dw 2.0
+output application/java
+---
+vars.result ++ [payload]]]></ee:set-variable>
+                                </ee:variables>
+                            </ee:transform>
+                        </when>
+                        <otherwise>
+                            <logger level="INFO" doc:name="Customer not found" doc:id="904a410f-4a6c-4487-8234-5bf85d8fb632" message="Customer #[payload.name] not found" />
+                        </otherwise>
+                    </choice>
+                </foreach>
+                <set-payload value="#[vars.result]" doc:name="Bring output to payload" doc:id="1cbf94d4-64cc-4fed-87ef-dd6fbf2b4a2b" />
+            </when>
+            <when expression="#[vars.queryParams.name == null and vars.queryParams.modifiedAfter != null]">
+                <ee:transform doc:name="Set XML input" doc:id="6c658e33-f848-4048-8886-124f5f73adf3">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "ZSDFM_CUSTOMER_GETLIST": {
+    "import": {
+      "IV_FROM_DATE": vars.queryParams.modifiedAfter
+    }
+  }
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <sap:execute-synchronous-remote-function-call key="ZSDFM_CUSTOMER_GETLIST"
+                    doc:name="ZSDFM_CUSTOMER_GETLIST" doc:id="1f93bc18-b8d1-4b3c-b029-778829e5f6b8" config-ref="SAP_Outbound" />
+                <ee:transform doc:name="Transform response to Java Maps" doc:id="5be2e393-ce09-4d4a-9409-45ed71b8287d">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+if (payload.ZSDFM_CUSTOMER_GETLIST.tables.T_KNA1 is Object) 
+payload.ZSDFM_CUSTOMER_GETLIST.tables.T_KNA1.*row map {
+	id: $.KUNNR,
+	name: $.NAME1,
+	billingAddress: {
+		street: $.STRAS,
+		city: $.ORT01,
+		postalCode: $.PSTLZ,
+		state: "",
+		country: $.LAND1
+	},
+	lastModifiedDate: $."LAST_MODIF_DATE",
+	lastModifiedById: $.AENAM
+} else []]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <set-payload value="#[[]]" doc:name="Set Empty array as payload" doc:id="1fca7494-489c-427a-a970-a0fce05d5679" />
+            </otherwise>
+        </choice>
+        <ee:transform doc:name="Filter by modifiedAfter" doc:id="5577a467-7fc3-4f41-8f57-d2771abe74f2">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+if (sizeOf(payload) != 0 and vars.queryParams.modifiedAfter != null) 
+	payload filter (($.lastModifiedDate as DateTime) > (vars.queryParams.modifiedAfter as DateTime))
+else payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <ee:transform doc:name="Filter by modifiedBefore" doc:id="241b8c4d-f9be-4b35-aebc-af3222d6158c">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+if (sizeOf(payload) != 0 and vars.queryParams.modifiedBefore != null)
+	payload filter (($.lastModifiedDate as DateTime) < (vars.queryParams.modifiedBefore as DateTime))
+else payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <ee:transform doc:name="Ordering" doc:id="de9eeb71-356c-42ae-9a31-1da5a17f3815">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+var fields = {
+	name: "name",
+	lastmodifieddate: "lastModifiedDate"
+}
+---
+if (sizeOf(payload) != 0 and vars.queryParams.orderBy != null) 
+	if (vars.queryParams.order != null and vars.queryParams.order == "desc") 
+        (payload orderBy $[fields[vars.queryParams.orderBy]])[-1 to 0]
+    else
+        payload orderBy $[fields[vars.queryParams.orderBy]]
+else payload
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <ee:transform doc:name="Pagination" doc:id="e978c17b-8aa0-4b2a-bf6a-080c4778f097">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+var maxResults = if (vars.queryParams.maxResults != null) (vars.queryParams.maxResults as Number) else -1
+var fromIndex  = if (vars.queryParams.offset != null) (vars.queryParams.offset as Number) else 0
+var toIndex    = if ((fromIndex + maxResults) >= sizeOf(payload)) (sizeOf(payload) - 1) else (fromIndex + maxResults - 1)
+---
+if (sizeOf(payload) != 0 and maxResults != -1) 
+	// return empty array when out of bounds or no results expected
+	if (maxResults == 0 or fromIndex > sizeOf(payload) - 1)
+	   []
+	else 
+	   payload[fromIndex to toIndex]
+else payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <ee:transform doc:name="Object to JSON" doc:id="566ed575-06ee-4c8c-af2a-feb4abdc328f">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\accounts:application\json:system-api-config">
+        <set-variable value="#[payload]" doc:name="Save input" doc:id="753a0139-04d9-4727-81ce-f740f5368af4" variableName="account"
+            encoding="UTF-8" mimeType="application/json" />
+        <ee:transform doc:name="Set XML input" doc:id="d084cb56-ec4e-4188-a5c1-c46636cb9e74">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "BAPI_CUSTOMER_GETINTNUMBER": {
+    "import": {
+      "ACCOUNTGROUP": p('sap.default.accountGroup')
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <sap:execute-synchronous-remote-function-call key="BAPI_CUSTOMER_GETINTNUMBER"
+            doc:name="Get Next Customer Number from SAP" doc:id="c3a17593-e4f0-4e2f-b053-3be370a2e344" config-ref="SAP_Outbound" />
+        <ee:transform doc:name="Get CUSTOMERID from BAPI_CUSTOMER_GETINTNUMBER" doc:id="da1f6eaf-64c9-403a-b16a-ca434748db2c">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="customerNumber"><![CDATA[%dw 2.0
+output application/java
+---
+payload."BAPI_CUSTOMER_GETINTNUMBER".export.CUSTOMERID]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Account to DEBMAS01" doc:id="ec7b481a-04d7-4dfb-8594-8eed95f2ac65">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+DEBMAS01 : {
+	IDOC @(BEGIN : "1") : {
+		"EDI_DC40" @(SEGMENT : "1"):  {
+			TABNAM      : "EDI_DC40",
+			DIRECT      : "2",
+			IDOCTYP     : "DEBMAS01",
+			MESTYP      : "DEBMAS",
+			SNDPOR      : "MULE01_LS",
+			SNDPRT      : "LS",
+			SNDPRN      : "MULE01_LS",
+			RCVPOR      : "T90CLNT090",
+			RCVPRT      : "LS",
+			RCVPRN      : "T90CLNT090"
+		},
+		E1KNA1M @(SEGMENT : "1") : {
+			MSGFN       : "009",
+			KUNNR       : vars.customerNumber,
+			KTOKD       : p('sap.default.accountGroup'),
+			LAND1       : "SK",
+			NAME1       : if (sizeOf(vars.account.name) <= 20) vars.account.name else vars.account.name[0 to 19],
+		    (ORT01      : vars.account.billingAddress.city) if (vars.account.billingAddress.city != null),
+			(PSTLZ      : vars.account.billingAddress.postalCode) if (vars.account.billingAddress.postalCode != null),
+			(STRAS      : vars.account.billingAddress.street) if (vars.account.billingAddress.street != null),
+			(TELF1      : vars.account.phone) if (vars.account.phone != null),
+			SPRAS       : "E",
+			"SPRAS_ISO" : "EN"
+		}
+	}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <sap:send doc:name="Insert Customer in SAP" doc:id="fa9971c8-f35d-4152-81e1-b6f13df600b8" config-ref="SAP_Outbound" key="DEBMAS01" />
+        <set-variable value="#[{ 'Location':'http://${api.domain}:${http.port}${api.basePath}/accounts/' ++ vars.customerNumber }]"
+            doc:name="Set Location header" doc:id="503b5d74-48a8-492b-8f8e-de0a7daa79c2" variableName="outboundHeaders" />
+        <ee:transform doc:name="Build response" doc:id="48c18cc5-dd5c-427f-b17e-deb2b7a9da10">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.customerNumber,
+	name: vars.account.name
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="getCustomerDetails" doc:id="52810d19-f71e-4ab9-af32-2e6a8c40145f">
+        <ee:transform doc:name="Set XML input" doc:id="f8d57c3b-178b-49eb-b194-6a0d7423e800">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "ZSDFM_CUSTOMER_GETLIST": {
+    "import": {
+      "IV_CUST_ID": vars.id
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <sap:execute-synchronous-remote-function-call doc:name="Get additional details of customer"
+            doc:id="062bc8d5-f009-4202-a085-9925ed5f59a8" config-ref="SAP_Outbound" key="ZSDFM_CUSTOMER_GETLIST" />
+        <ee:transform doc:name="Transform response array of maps" doc:id="a21a11f2-0093-4b0b-9b40-f585a5bec767">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+(if (payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1" is Object) 
+(payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1".*row map {
+	id              	: $.KUNNR,
+	name            	: $.NAME1,
+	billingAddress: {
+		street     		: $.STRAS,
+		city       		: $.ORT01,
+		postalCode 		: $.PSTLZ,
+		state      		: null,
+		country    		: $.LAND1
+	},
+	lastModifiedDate	: $."LAST_MODIF_DATE",
+	lastModifiedById	: $.AENAM
+})[0] else null)]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="checkCustomer" doc:id="faa3d43e-b159-4bbb-884a-7e2bed5ef51b">
+        <ee:transform doc:name="Set XML input" doc:id="c75f4eb2-975c-4c2b-aa02-8947b1950673">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "BAPI_CUSTOMER_FIND": {
+    "tables": {
+      "SELOPT_TAB": {
+        "row": {
+          "TABNAME": "KNA1",
+          "FIELDNAME": "KUNNR",
+          "FIELDVALUE": vars.id
+        }
+      }
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <sap:execute-synchronous-remote-function-call key="BAPI_CUSTOMER_FIND" doc:name="BAPI_CUSTOMER_FIND"
+            doc:id="aa55b834-b51a-4cee-9252-b5666331580e" config-ref="SAP_Outbound" />
+        <ee:transform doc:name="Check customer response" doc:id="1e5cf3ff-a8a4-4338-8a3b-8c52fdd75cfe">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="customerExists"><![CDATA[%dw 2.0
+output application/java
+---
+if (payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row[0]."CUSTOMER" != null and 
+           payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row[0]."DEL_FLAG_G" != "X")
+true else false]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+</mule>
