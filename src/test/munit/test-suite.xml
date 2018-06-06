@@ -18,8 +18,33 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         basePath="${api.basePath}">
         <http:request-connection host="${api.domain}" port="${http.port}" />
     </http:request-config>
-
-    <munit:test name="test-get:accounts:system-api-configTest-nameProvided" description="MUnit Test" doc:id="e7d478ae-d10e-4019-b6b8-ec5976acae02">
+	<munit:test name="test-get:accounts:system-api-configTest-nameProvided" description="MUnit Test" doc:id="4603acaf-d781-4ec2-a587-719b76433a97" ignore="true">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="system-api-main" />
+			<munit:enable-flow-source value="get:\accounts:system-api-config" />
+			<munit:enable-flow-source value="getCustomerDetails" />
+		</munit:enable-flow-sources>
+		<munit:execution >
+			<http:request method="GET" doc:name="HTTP GET Request" doc:id="6ebf738c-4021-4fef-bd9e-dd11e7400ebc" config-ref="HTTP_Request_Configuration" path="/accounts" >
+				<http:query-params ><![CDATA[#[output applicaton/java
+---
+{
+	"name" : "test",
+	"match" : "like",
+	"modifiedAfter" : "2016-04-01T00:00:00.000Z",
+	"maxResults" : "5",
+	"offset" : "0",
+	"orderBy" : "lastmodifieddate",
+	"order" : "asc"
+}]]]></http:query-params>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that http.status eq 200" doc:id="1449487c-a810-4919-a567-a09780f6414c" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" />
+			<munit-tools:assert-that doc:name="Assert that there are 5 accounts" doc:id="d401adc9-6a7a-4955-a3ee-2d663d2e7555" expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(5)]" message="There should be 5 accounts in the payload." />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="test-get:accounts:system-api-configTest-nameProvided-checkResponse" description="MUnit Test" doc:id="e7d478ae-d10e-4019-b6b8-ec5976acae02">
         <munit:enable-flow-sources>
             <munit:enable-flow-source value="system-api-main" />
 			<munit:enable-flow-source value="get:\accounts:system-api-config" />
@@ -74,7 +99,31 @@ payload map $.id]]></ee:set-payload>
 			<munit-tools:assert-that doc:name="Assert that there are concrete accounts in particular order" doc:id="74ef4a52-32d9-46fc-8c27-7ff02bb84050" expression="#[payload]" message="There should be concrete accounts in particular order." is='#[MunitTools::equalTo(["0000301898", "0000301970", "0000301973"])]'/>
         </munit:validation>
     </munit:test>
-	<munit:test name="test-get:accounts:system-api-configTest-nameNotProvided" description="MUnit Test" doc:id="2755a0da-82e7-4e90-a5ab-93f0b4566d9e">
+	<munit:test name="test-get:accounts:system-api-configTest-nameNotProvided" description="MUnit Test" doc:id="09fbe938-9c55-4d48-935c-6fb1d229e9f4">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="system-api-main" />
+			<munit:enable-flow-source value="get:\accounts:system-api-config" />
+		</munit:enable-flow-sources>
+		<munit:execution >
+			<http:request method="GET" doc:name="HTTP GET Request" doc:id="6ebf738c-4021-4fef-bd9e-dd11e7400ebc" config-ref="HTTP_Request_Configuration" path="/accounts" >
+				<http:query-params ><![CDATA[#[output applicaton/java
+---
+{
+	"modifiedAfter" : "2016-04-01T00:00:00.000Z",
+	"modifiedBefore" : "2018-05-01T00:00:00.000Z",
+	"maxResults" : "5",
+	"offset" : "5",
+	"orderBy" : "name",
+	"order" : "desc"
+}]]]></http:query-params>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that http.status eq 200" doc:id="1449487c-a810-4919-a567-a09780f6414c" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" />
+			<munit-tools:assert-that doc:name="Assert that there are 5 accounts" doc:id="d401adc9-6a7a-4955-a3ee-2d663d2e7555" expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(5)]" message="There should be 5 accounts in the payload." />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="test-get:accounts:system-api-configTest-nameNotProvided-checkOrder" description="MUnit Test" doc:id="2755a0da-82e7-4e90-a5ab-93f0b4566d9e">
 		<munit:enable-flow-sources >
 			<munit:enable-flow-source value="system-api-main" />
 			<munit:enable-flow-source value="get:\accounts:system-api-config" />
@@ -85,7 +134,7 @@ payload map $.id]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="ZSDFM_CUSTOMER_GETLIST" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('zsdfm_customer_getlist_collection_output.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('zsdfm_customer_getlist_collection_output.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
@@ -158,7 +207,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="Get Account Group from SAP" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload encoding="application/xml" value="#[MunitTools::getResourceAsString('get_customer_details_output_success.xml')]"/>
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('get_customer_details_output_success.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Mock getCustomerNumber" doc:id="f87f1286-4a6e-4ce0-b70e-d38ddacf6dd6" processor=".*:.*">
@@ -166,7 +215,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="Get Next Customer Number from SAP" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload encoding="application/xml" value="#[MunitTools::getResourceAsString('bapi_customer_getintnumber_output.xml')]"/>
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_getintnumber_output.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Mock insertCustomer" doc:id="40871c15-b346-40ba-935b-8ad2bc173ed3" processor=".*:.*">
@@ -215,7 +264,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="BAPI_CUSTOMER_FIND" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_success.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_success.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Mock getCustomerDetails" doc:id="feddd738-82f3-4cb4-b2bc-79f375f85cb7" processor=".*:.*">
@@ -223,7 +272,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="Get additional details of customer" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('get_customer_details_output_success.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('get_customer_details_output_success.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
@@ -256,7 +305,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="BAPI_CUSTOMER_FIND" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_not_found.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_not_found.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
@@ -284,7 +333,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="BAPI_CUSTOMER_FIND" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload encoding="application/xml" value="#[MunitTools::getResourceAsString('bapi_customer_find_output_success.xml')]"/>
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_success.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Mock Delete Customer" doc:id="b127c98b-0f84-4c1c-831e-f471867ba3df" processor=".*:.*">
@@ -320,7 +369,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="BAPI_CUSTOMER_FIND" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_not_found.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_not_found.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
@@ -348,7 +397,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="BAPI_CUSTOMER_FIND" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_success.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_success.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Mock getCustomerGroup" doc:id="32240a45-bda8-4616-9638-4d39db82e56c" processor=".*:.*">
@@ -356,7 +405,7 @@ payload]]></ee:set-payload>
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="Get Account Group from SAP" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('get_customer_details_output_success.xml')]" encoding="application/xml"/>
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('get_customer_details_output_success.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Mock updateCustomer" doc:id="3efbfe74-9177-4083-b490-b157c553cb14" processor=".*:.*">
@@ -425,7 +474,7 @@ output application/json
 					<munit-tools:with-attribute attributeName="doc:name" whereValue="BAPI_CUSTOMER_FIND" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_not_found.xml')]" encoding="application/xml" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('bapi_customer_find_output_not_found.xml')]" mediaType="application/xml"/>
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
