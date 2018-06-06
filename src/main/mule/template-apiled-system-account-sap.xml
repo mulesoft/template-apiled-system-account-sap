@@ -10,7 +10,8 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
     <http:listener-config name="system-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="${http.port}" />
     </http:listener-config>
-    <apikit:config name="system-api-config" raml="system-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" doc:name="Router"/>
+    <apikit:config name="system-api-config" raml="system-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus"
+        doc:name="Router" />
     <sap:outbound-config name="SAP_Outbound" doc:name="SAP Outbound" doc:id="fd626ca1-187e-4a11-82a9-74605acbbf3c">
         <sap:simple-connection-provider-connection applicationServerHost="${sap.jco.ashost}"
             username="${sap.jco.user}" password="${sap.jco.passwd}" systemNumber="${sap.jco.sysnr}" client="${sap.jco.client}" language="${sap.jco.lang}" />
@@ -557,10 +558,10 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="getCustomerDetails" doc:id="52810d19-f71e-4ab9-af32-2e6a8c40145f">
-        <ee:transform doc:name="Set XML input" doc:id="f8d57c3b-178b-49eb-b194-6a0d7423e800">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+    <sub-flow name="getCustomerDetails" doc:id="a9eb2e86-6a78-489d-9aac-c6eb9e8f24af">
+		<ee:transform doc:name="Set XML input" doc:id="f8d57c3b-178b-49eb-b194-6a0d7423e800" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/xml
 ---
 {
@@ -570,13 +571,12 @@ output application/xml
     }
   }
 }]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-        <sap:execute-synchronous-remote-function-call doc:name="Get additional details of customer"
-            doc:id="062bc8d5-f009-4202-a085-9925ed5f59a8" config-ref="SAP_Outbound" key="ZSDFM_CUSTOMER_GETLIST" />
-        <ee:transform doc:name="Transform response array of maps" doc:id="a21a11f2-0093-4b0b-9b40-f585a5bec767">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+			</ee:message>
+		</ee:transform>
+		<sap:execute-synchronous-remote-function-call key="ZSDFM_CUSTOMER_GETLIST" doc:name="Get additional details of customer" doc:id="062bc8d5-f009-4202-a085-9925ed5f59a8" config-ref="SAP_Outbound" />
+		<ee:transform doc:name="Transform response array of maps" doc:id="a21a11f2-0093-4b0b-9b40-f585a5bec767" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/java
 ---
 (if (payload."ZSDFM_CUSTOMER_GETLIST".tables."T_KNA1" is Object) 
@@ -593,15 +593,14 @@ output application/java
 	lastModifiedDate	: $."LAST_MODIF_DATE",
 	lastModifiedById	: $.AENAM
 })[0] else null)]]></ee:set-payload>
-            </ee:message>
-            <ee:variables>
-            </ee:variables>
-        </ee:transform>
-    </flow>
-    <flow name="checkCustomer" doc:id="faa3d43e-b159-4bbb-884a-7e2bed5ef51b">
-        <ee:transform doc:name="Set XML input" doc:id="c75f4eb2-975c-4c2b-aa02-8947b1950673">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+	</sub-flow>
+    <sub-flow name="checkCustomer" doc:id="9a547ffa-f83f-4435-8d51-b9f017b7359a" >
+		<ee:transform doc:name="Set XML input" doc:id="c75f4eb2-975c-4c2b-aa02-8947b1950673" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/xml
 ---
 {
@@ -617,21 +616,19 @@ output application/xml
     }
   }
 }]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-        <sap:execute-synchronous-remote-function-call key="BAPI_CUSTOMER_FIND" doc:name="BAPI_CUSTOMER_FIND"
-            doc:id="aa55b834-b51a-4cee-9252-b5666331580e" config-ref="SAP_Outbound" />
-        <ee:transform doc:name="Check customer response" doc:id="1e5cf3ff-a8a4-4338-8a3b-8c52fdd75cfe">
-            <ee:message>
-            </ee:message>
-            <ee:variables>
-                <ee:set-variable variableName="customerExists"><![CDATA[%dw 2.0
+			</ee:message>
+		</ee:transform>
+		<sap:execute-synchronous-remote-function-call key="BAPI_CUSTOMER_FIND" doc:name="BAPI_CUSTOMER_FIND" doc:id="aa55b834-b51a-4cee-9252-b5666331580e" config-ref="SAP_Outbound" />
+		<ee:transform doc:name="Check customer response" doc:id="1e5cf3ff-a8a4-4338-8a3b-8c52fdd75cfe" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="customerExists" ><![CDATA[%dw 2.0
 output application/java
 ---
 if (payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row[0]."CUSTOMER" != null and 
            payload."BAPI_CUSTOMER_FIND".tables."RESULT_TAB".*row[0]."DEL_FLAG_G" != "X")
 true else false]]></ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-    </flow>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
 </mule>
