@@ -17,6 +17,7 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
             username="${sap.jco.user}" password="${sap.jco.passwd}" systemNumber="${sap.jco.sysnr}" client="${sap.jco.client}" language="${sap.jco.lang}" />
     </sap:outbound-config>
 
+    <global-property name="mule.env" value="dev" doc:name="Global Property" />
     <configuration-properties doc:name="Configuration properties" doc:id="c3fcb5c6-cb55-4fe1-a881-7716b5c70cd0"
         file="common.properties" />
     <configuration-properties doc:name="Configuration properties" doc:id="674a6931-6133-472e-91d7-e6a979ff4427"
