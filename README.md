@@ -22,11 +22,11 @@ This template helps you design an Account System API. It provides a means of hid
 
 The CRM System API supports the following operations:
 
-GET/accounts
-POST/accounts
-GET/account/{id}
-PUT/accounts/{id}
-DELETE/accounts/{id}
+* GET/accounts
+* POST/accounts
+* GET/account/{id}
+* PUT/accounts/{id}
+* DELETE/accounts/{id}
 
 ### License Agreement
 
