@@ -3,7 +3,7 @@
 
 <!-- Header (start) -->
 
-This template helps you design an Account System API. It provides a means of hiding the complexity of the SAP APIs implementation from a user while exposing data in a canonical format. The template abstracts account data from a SAO into canonical objects that are defined within a CRM System API. This API uses JSON as an exchange format and translates calls into the semantic data structure required by SAP.
+This template helps you design an Account System API. It provides a means of hiding the complexity of the SAP APIs implementation from a user while exposing data in a canonical format. The template abstracts account data from a SAP system into canonical objects that are defined within a CRM System API. This API uses JSON as an exchange format and translates calls into the semantic data structure required by SAP.
 
 ![7db56754-7c0e-4567-a42b-1942acbedc33-image.png](https://exchange2-file-upload-service-kprod.s3.us-east-1.amazonaws.com:443/7db56754-7c0e-4567-a42b-1942acbedc33-image.png)
 
