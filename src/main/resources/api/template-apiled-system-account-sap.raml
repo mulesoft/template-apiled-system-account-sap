@@ -1,6 +1,7 @@
 #%RAML 1.0
-title: System API
+title: Account SAP System API
 version: v2.0
+baseUri: http://localhost:8081/api
   
 types:
   address: !include dataTypes/Address.raml
@@ -12,12 +13,12 @@ traits:
   accountSearch: !include traits/trait-collection.raml
 
 /accounts:
-  displayName: Accounts
   description: |
     Working with accounts:
     * Retrieving all accounts
     * Creating accounts
   get:
+    displayName: Get accounts
     description: |
       Retrieve all the Accounts.
     is: [ accountSearch ]
@@ -52,22 +53,23 @@ traits:
         body:
           application/json:
             type: account[]
-            example: !include examples/get_accounts_example.json
+            example: !include examples/get_accounts_example.yaml
   post:
+    displayName: Create account
     description: |
       Create a new Account
     body:
       application/json:
         type: account
-        example: !include examples/post_account_example.json
+        example: !include examples/post_account_example.yaml
     responses:
       201:
-        description: Created
         body:
           application/json:
+            type: account
             example: |
               {
-                "id": "0000301980"
+                "id": "0000301980",
                 "name": "Example Company"
               }
       400:
@@ -79,7 +81,6 @@ traits:
                   "message": "Failed to create new Account"
                 }
   /{id}:
-    displayName: Account ID
     description: |
       Working with accounts:
       * Retrieving specific account
@@ -91,13 +92,14 @@ traits:
         example: "0000301980"
         description: Represents the account ID of native system
     get:
+      displayName: Get account by id
       description: Get Account by ID
       responses:
         200:
           body:
             application/json:
               type: account
-              example: !include examples/get_accountById_example.json
+              example: !include examples/get_accountById_example.yaml
         404:
           body:
             application/json:
@@ -107,11 +109,12 @@ traits:
                   "message": "Resource not found"
                 }
     put:
+      displayName: Update account by id
       description: Update Account specified by ID
       body:
         application/json:
           type: account
-          example: !include examples/put_account_example.json
+          example: !include examples/put_account_example.yaml
       responses:
         200:
           body:
@@ -130,6 +133,7 @@ traits:
                   "message": "Resource not found"
                 }
     delete:
+      displayName: Delete account by id
       description: Delete Account specified by ID
       responses:
         200:

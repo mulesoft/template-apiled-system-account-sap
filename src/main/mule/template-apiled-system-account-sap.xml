@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
         <http:listener-connection host="0.0.0.0" port="${http.port}" />
     </http:listener-config>
     <apikit:config name="system-api-config" raml="system-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus"
-        doc:name="Router" />
+        doc:name="Router" api="api/template-apiled-system-account-sap.raml"/>
     <sap:outbound-config name="SAP_Outbound" doc:name="SAP Outbound" doc:id="fd626ca1-187e-4a11-82a9-74605acbbf3c">
         <sap:simple-connection-provider-connection applicationServerHost="${sap.jco.ashost}"
             username="${sap.jco.user}" password="${sap.jco.passwd}" systemNumber="${sap.jco.sysnr}" client="${sap.jco.client}" language="${sap.jco.lang}" />
@@ -22,8 +22,6 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
         file="common.properties" />
     <configuration-properties doc:name="Configuration properties" doc:id="674a6931-6133-472e-91d7-e6a979ff4427"
         file="mule.${mule.env}.properties" />
-    <configuration-properties doc:name="Configuration properties" doc:id="be3b5646-f262-4e3e-bb1f-fcad24af9758"
-        file="mule-artifact.properties" />
     <flow name="system-api-main">
         <http:listener config-ref="system-api-httpListenerConfig" path="${api.basePath}/*" doc:name="Listener">
             <http:response statusCode="#[vars.httpStatus default 200]">
