@@ -7,7 +7,7 @@
         <version>2.1.21</version>
     </parent>
     <artifactId>template-apiled-system-account-sap</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1</version>
     <packaging>mule-application</packaging>
     <name>template-apiled-system-account-sap</name>
     <build>
@@ -96,4 +96,4 @@
             <layout>default</layout>
         </repository>
     </repositories>
-<scm><connection>scm:git:git@github.com:mulesoft/template-apiled-system-account-sap.git</connection><developerConnection>scm:git:git@github.com:mulesoft/template-apiled-system-account-sap.git</developerConnection><url>https://github.com/mulesoft/template-apiled-system-account-sap</url><tag>HEAD</tag></scm></project>
+<scm><connection>scm:git:git@github.com:mulesoft/template-apiled-system-account-sap.git</connection><developerConnection>scm:git:git@github.com:mulesoft/template-apiled-system-account-sap.git</developerConnection><url>https://github.com/mulesoft/template-apiled-system-account-sap</url><tag>v2.1.1</tag></scm></project>
