@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
         <http:listener-connection host="0.0.0.0" port="${http.port}" />
     </http:listener-config>
     <apikit:config name="system-api-config" raml="system-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus"
-        doc:name="Router" api="api/template-apiled-system-account-sap.raml"/>
+        doc:name="Router" api="api/template-apiled-account-system-api.raml"/>
     <sap:outbound-config name="SAP_Outbound" doc:name="SAP Outbound" doc:id="fd626ca1-187e-4a11-82a9-74605acbbf3c">
         <sap:simple-connection-provider-connection applicationServerHost="${sap.jco.ashost}"
             username="${sap.jco.user}" password="${sap.jco.passwd}" systemNumber="${sap.jco.sysnr}" client="${sap.jco.client}" language="${sap.jco.lang}" />
