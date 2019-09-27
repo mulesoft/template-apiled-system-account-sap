@@ -1,9 +1,9 @@
 #%RAML 1.0
-title: Account SAP System API
+title: Account System API
 version: v2.0
 baseUri: http://localhost:8081/api
   
-types:
+types: 
   address: !include dataTypes/Address.raml
   account: !include dataTypes/Account.raml
   errorResponse: !include dataTypes/ErrorResponse.raml
@@ -20,7 +20,7 @@ traits:
   get:
     displayName: Get accounts
     description: |
-      Retrieve all the Accounts.
+      Retrieve all Accounts.
     is: [ accountSearch ]
     queryParameters:
       name:
@@ -40,14 +40,14 @@ traits:
         displayName: Only those modified after this date
         minLength: 23
         maxLength: 29
-        example: 2016-04-28T14:00:00.000Z
         required: false
+        example: 2016-04-28T14:00:00.000Z
       modifiedBefore:
         displayName: Only those modified before this date
         minLength: 23
         maxLength: 29
-        example: 2016-05-28T14:00:00.000Z
         required: false
+        example: 2016-05-28T14:00:00.000Z
     responses:
       200:
         body:
@@ -69,17 +69,17 @@ traits:
             type: account
             example: |
               {
-                "id": "0000301980",
+                "id": "0012000001BaRgPAAV",
                 "name": "Example Company"
               }
       400:
-          body:
-            application/json:
-              type: errorResponse
-              example: |
-                {
-                  "message": "Failed to create new Account"
-                }
+        body:
+          application/json:
+            type: errorResponse
+            example: |
+              {
+                "message": "Failed to create new Account"
+              }
   /{id}:
     description: |
       Working with accounts:
@@ -89,8 +89,8 @@ traits:
     uriParameters:
       id:
         type: string
-        example: "0000301980"
-        description: Represents the account ID of native system
+        example: 0012000001BaRgPAAV
+        description: Represents the account unique id
     get:
       displayName: Get account by id
       description: Get Account by ID
